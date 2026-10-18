@@ -1,0 +1,402 @@
+/* --- Culori și setări globale --- */
+:root {
+  --primary: #04AA6D;       /* Culoarea principală a interfeței (verde) */
+  --primary-hover: #04AA6D;
+  --sidebar-bg: #1e293b;    /* Fundalul închis al meniului lateral */
+  --bg-color: #f8fafc;      /* Fundalul deschis al paginii */
+  --text-main: #334155;     /* Culoarea principală a textului */
+}
+
+
+
+body {
+  margin: 0;
+  font-family: Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+}
+
+/* --- Structura principală a paginii --- */
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* --- Meniul lateral (Sidebar) --- */
+.sidebar {
+  width: 280px;
+  background-color: var(--sidebar-bg);
+  padding: 25px 20px;
+  overflow-y: auto;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.sidebar h2 {
+  color: white;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 10px;
+  margin-top: 0;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin-bottom: 10px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px 15px;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.sidebar a:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: translateX(5px); /* Efect de glisare ușoară spre dreapta */
+}
+
+/* --- Zona de conținut (teoria) --- */
+.main-content {
+  flex: 1;
+  padding: 50px;
+  overflow-y: auto;
+  background-color: white;
+}
+
+.lesson-container {
+  max-width: 850px; /* Limitează lățimea textului pentru o lizibilitate optimă */
+  margin: 0 auto;
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+.lesson-container h1 {
+  color: var(--primary);
+  font-size: 2.5rem;
+  border-bottom: 3px solid #e2e8f0;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+}
+
+.lesson-container h2 {
+  margin-top: 40px;
+  color: #0f172a;
+}
+
+.lesson-container img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px; /* Colțuri rotunjite */
+}
+
+/* Stilizarea blocurilor de cod din Markdown */
+.lesson-container pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 20px;
+  border-radius: 10px;
+  overflow-x: auto;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.lesson-container code {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+
+/* --- Exercițiile --- */
+.exercise-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 25px;
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s ease;
+}
+
+.exercise-card:hover {
+  transform: translateY(-3px); /* Ușoară ridicare la trecerea cursorului */
+}
+
+.exercise-card input {
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  width: 250px;
+  margin-right: 15px;
+  transition: border-color 0.3s ease;
+}
+
+.exercise-card input:focus {
+  border-color: var(--primary);
+}
+
+.btn {
+  background: var(--primary);
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.btn:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Stiluri pentru logo */
+.logo-container {
+  padding-bottom: 20px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.logo-text {
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+/* Se previne modificarea fundalului logo-ului la trecerea cursorului */
+.logo-container a:hover {
+  background-color: transparent; /* Fundal transparent */
+  color: white; /* Textul rămâne alb */
+  transform: none; /* Se anulează efectul de transformare */
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 20px 0;
+}
+
+.section-title {
+  color: #64748b;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+  padding-left: 10px;
+}
+
+/* Stiluri pentru elementele de navigare active */
+.nav-item {
+  display: block;
+  padding: 12px 15px;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.nav-item.active {
+  background: rgba(4, 170, 109, 0.15);
+  color: #04AA6D;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+/* Stilizarea butonului de deconectare */
+.logout-btn {
+  margin-top: auto;
+  background: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.logout-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* Stilul lecției curent selectate */
+.lesson-link.current {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+/* Aspectul link-urilor de lecție: marginea stângă dreaptă, dreapta rotunjită */
+.lesson-link {
+  display: block;
+  padding: 10px 15px;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-radius: 0 8px 8px 0; /* Latura stângă rămâne dreaptă, cea dreaptă este rotunjită */
+  margin-bottom: 5px;
+  transition: all 0.2s;
+}
+
+.lesson-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.lesson-link.current {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.lesson-link.completed {
+  border-left: 4px solid #04AA6D;
+}
+
+.lesson-link.pending {
+  border-left: 4px solid transparent;
+}
+
+/* --- Bara de progres --- */
+.progress-container {
+  padding: 0 15px;
+  margin-bottom: 25px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.progress-track {
+  background: rgba(255, 255, 255, 0.1);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: #04AA6D;
+  height: 100%;
+  transition: width 0.5s ease-in-out;
+}
+
+/* =========================================
+   Comutatorul (toggle) pentru tema întunecată
+   ========================================= */
+.theme-switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  margin-top: auto; /* Poziționează comutatorul în partea de jos a barei laterale */
+}
+
+.theme-switch {
+  display: inline-block;
+  height: 24px;
+  position: relative;
+  width: 50px;
+  margin: 0 10px;
+}
+
+.theme-switch input {
+  display: none;
+}
+
+.slider {
+  background-color: #64748b;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  background-color: #fff;
+  bottom: 4px;
+  content: "";
+  height: 16px;
+  left: 4px;
+  position: absolute;
+  transition: 0.4s;
+  width: 16px;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #04AA6D; /* Comutatorul devine verde în stare activă */
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* =========================================
+   Regulile pentru tema întunecată
+   ========================================= */
+body.dark-mode {
+  background-color: #0f172a !important; /* Fundal închis, gri-albăstrui */
+  color: #e2e8f0 !important; /* Text de culoare deschisă */
+}
+
+/* Se aplică tema întunecată și containerului de lecție */
+body.dark-mode .main-content,
+body.dark-mode .lesson-container  {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+
+/* Se ajustează cardurile de exerciții, care au fundal alb definit inline */
+body.dark-mode .exercise-card {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+body.dark-mode .exercise-card .exercise-card-title .h2{
+ 
+  
+  color: #e2e8f0 !important;
+}
+
+/* Liniile separatoare */
+body.dark-mode hr {
+  border-color: #334155 !important;
+}
+
+/* Toate titlurile devin albe în tema întunecată */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+  color: #ffffff !important;
+}

@@ -1,0 +1,693 @@
+[
+{
+  "model": "core.lesson",
+  "pk": 4,
+  "fields": {
+    "title": "Introducere în Grafuri Neorientate",
+    "content": "Un graf este o structură de date neliniară fundamentală, utilizată pentru a modela relații (legături) între diferite obiecte.\r\n\r\n\r\n## Definiție Formală\r\n\r\nDin punct de vedere matematic, un graf neorientat se notează cu $G = (V, E)$, unde:\r\n* **$V$ (Vertices/Noduri)**: Este o mulțime finită și nevidă de elemente (ex: orașe, servere, persoane).\r\n* **$E$ (Edges/Muchii)**: Este o mulțime de perechi neordonate de elemente din $V$, reprezentând legăturile dintre noduri.\r\n\r\n\r\n![Un graf oarecare cu 5 noduri](/media/lectia1/vertices_nodes.png)\r\n\r\nDacă există o muchie între nodul $x$ și nodul $y$, notată $e = (x, y)$, spunem că nodurile $x$ și $y$ sunt **adiacente**, iar muchia $e$ este **incidentă** cu ambele noduri. Deoarece graful este neorientat, muchia $(x, y)$ este perfect identică cu muchia $(y, x)$.\r\n\r\n\r\n\r\n## Gradul unui nod\r\n**Gradul** unui nod $x$, notat $d(x)$ (din engleză, *degree*), reprezintă numărul de muchii incidente cu acel nod.\r\n* Un nod cu gradul $0$ se numește **nod izolat** (nu este conectat la restul rețelei).\r\n* Un nod cu gradul $1$ se numește **nod terminal** sau **frunză**.\r\n\r\n![Un graf oarecare cu 5 noduri](/media/lectia1/grad.png)\r\n\r\n## Graf Complet\r\nUn graf neorientat se numește **complet** dacă oricare două noduri distincte sunt adiacente (există o muchie directă între oricare două noduri). \r\n\r\n![Un graf oarecare cu 5 noduri](/media/lectia1/graf_neorientat_complet.png)\r\n\r\nNumărul maxim de muchii într-un graf complet cu $n$ noduri se calculează folosind formula:\r\n\r\n##                                                              $$m = \\frac{n(n-1)}{2}$$\r\n\r\n\r\n\r\n---\r\n\r\n## 💻 Implementare: Calculul Gradelor\r\n\r\nSă presupunem că citim de la tastatură numărul de noduri $n$, numărul de muchii $m$, și apoi cele $m$ muchii. Vrem să calculăm și să afișăm gradul fiecărui nod. \r\n\r\nAceasta este o operație de bază, iar algoritmul folosește un vector de frecvență pentru a contoriza de câte ori apare un nod în citirea muchiilor (fiecare muchie citită crește gradul ambelor extremități).\r\n\r\n### C++\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\nint main() {\r\n    int n, m;\r\n    cout << \"Introdu numarul de noduri si muchii: \";\r\n    cin >> n >> m;\r\n\r\n    // Vector pentru a stoca gradul fiecarui nod, initializat cu 0\r\n    // Dimensiunea este n + 1 pentru a indexa nodurile direct de la 1\r\n    vector<int> grad(n + 1, 0);\r\n\r\n    cout << \"Introdu cele \" << m << \" muchii (u v):\\n\";\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        // O muchie (u, v) contribuie cu 1 la gradul lui u si cu 1 la gradul lui v\r\n        grad[u]++;\r\n        grad[v]++;\r\n    }\r\n\r\n    cout << \"\\n--- Rezultate ---\\n\";\r\n    for (int i = 1; i <= n; ++i) {\r\n        cout << \"Nodul \" << i << \" are gradul \" << grad[i] << \"\\n\";\r\n    }\r\n\r\n    return 0;\r\n}",
+    "category": "GRAPH",
+    "order": 1
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 5,
+  "fields": {
+    "title": "Reprezentarea Grafurilor în Memorie",
+    "content": "Pentru ca un calculator să poată prelucra un graf, trebuie să \"traducem\" desenul de pe foaie într-o structură de date pe care memoria o poate stoca. Există două metode principale, fiecare cu avantajele și dezavantajele ei:\r\n\r\n## 1. Matricea de Adiacență\r\n\r\n![Matrice de adiacenta](/media/lectia2/matrice_adiacenta.png)\r\n\r\nEste o matrice pătratică $A$ de dimensiune $V \\times V$ (unde $V$ este numărul de noduri).\r\n* Dacă există muchia $(i, j)$, atunci $A[i][j] = 1$.\r\n* Dacă nu există muchia, atunci $A[i][j] = 0$.\r\n\r\nPentru grafurile neorientate, matricea de adiacență este mereu **simetrică** față de diagonala principală ($A[i][j] = A[j][i]$). Pe diagonala principală vom avea mereu $0$ (deoarece un nod nu are muchie către el însuși în grafurile simple).\r\n\r\n* **Avantaj:** Verificarea existenței unei muchii între două noduri se face instantaneu, în timp $O(1)$.\r\n* **Dezavantaj:** Ocupă multă memorie. Complexitatea spațială este $O(V^2)$, indiferent de câte muchii există în realitate. Este ideală pentru **grafuri dense** (cu multe legături).\r\n\r\n### 💻 Implementare C++\r\n```cpp\r\n#include <iostream>\r\nusing namespace std;\r\n\r\n// Declarăm matricea global pentru a fi inițializată automat cu 0\r\nint A[105][105]; \r\n\r\nint main() {\r\n    int n, m; // n = număr noduri, m = număr muchii\r\n    cout << \"Numar noduri si muchii: \";\r\n    cin >> n >> m;\r\n\r\n    cout << \"Introdu cele \" << m << \" muchii:\\n\";\r\n    for(int i = 1; i <= m; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        \r\n        // Marcăm muchia în ambele direcții pentru graf neorientat\r\n        A[u][v] = 1;\r\n        A[v][u] = 1; \r\n    }\r\n\r\n    cout << \"\\nMatricea de Adiacenta este:\\n\";\r\n    for(int i = 1; i <= n; i++) {\r\n        for(int j = 1; j <= n; j++) {\r\n            cout << A[i][j] << \" \";\r\n        }\r\n        cout << \"\\n\";\r\n    }\r\n\r\n    return 0;\r\n}\r\n```\r\n\r\n---\r\n\r\n## 2. Listele de Adiacență\r\n![Lista de adiacenta](/media/lectia2/lista_adiacenta.png)\r\n\r\nPentru fiecare nod $i$, se păstrează o listă (sau un vector dinamic) care conține doar vecinii direcți ai nodului $i$.\r\n\r\n* **Avantaj:** Este extrem de eficientă din punct de vedere al memoriei pentru **grafuri rare** (cu puține muchii). Complexitatea spațială este proporțională cu numărul de noduri și muchii: $O(V + E)$.\r\n* **Dezavantaj:** Verificarea existenței muchiei $(i, j)$ necesită parcurgerea listei nodului $i$, ceea ce durează mai mult decât în cazul matricei.\r\n\r\n### 💻 Implementare C++\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\nusing namespace std;\r\n\r\nconst int NMAX = 100005;\r\n// Declarăm un array de vectori (o listă pentru fiecare nod)\r\nvector<int> adj[NMAX]; \r\n\r\nint main() {\r\n    int n, m;\r\n    cout << \"Numar noduri si muchii: \";\r\n    cin >> n >> m;\r\n\r\n    cout << \"Introdu cele \" << m << \" muchii:\\n\";\r\n    for(int i = 1; i <= m; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        \r\n        // Adăugăm u în lista lui v, și v în lista lui u\r\n        adj[u].push_back(v);\r\n        adj[v].push_back(u); \r\n    }\r\n\r\n    cout << \"\\nListele de Adiacenta sunt:\\n\";\r\n    for(int i = 1; i <= n; i++) {\r\n        cout << \"Nodul \" << i << \": \";\r\n        \r\n        // Parcurgem lista vecinilor pentru nodul i\r\n        for(int vecin : adj[i]) {\r\n            cout << vecin << \" \";\r\n        }\r\n        cout << \"\\n\";\r\n    }\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "GRAPH",
+    "order": 2
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 6,
+  "fields": {
+    "title": "Grafuri Orientate",
+    "content": "Până acum am discutat despre străzi cu dublu sens. Grafurile orientate (sau digrafurile) aduc în discuție străzile cu **sens unic**.\r\n\r\n## Definiție\r\nUn graf orientat este o pereche $G = (V, E)$, unde $E$ este o mulțime de perechi **ordonate** de noduri. \r\nLegăturile se numesc **arce** (nu muchii). Dacă avem un arc $(x, y)$, acesta are un sens strict de la $x$ la $y$.\r\n\r\n![Graf orientat](/media/lectia3/graf_orientat.png)\r\n\r\n* Nodul $x$ se numește **extremitate inițială** (sau predecesor).\r\n* Nodul $y$ se numește **extremitate finală** (sau succesor).\r\n\r\nDatorită acestui sens strict, în matricea de adiacență $A[x][y] = 1$ nu înseamnă obligatoriu că și $A[y][x] = 1$. Astfel, matricea de adiacență a unui digraf **nu mai este simetrică**.\r\n\r\n![Graf orientat - Matrice de adiacenta](/media/lectia3/matrice_adiacenta_go.png)\r\n\r\n## Gradele într-un Graf Orientat\r\n\r\nDeoarece arcele au o direcție, conceptul de grad se împarte în două:\r\n1. **Gradul interior** al nodului $x$, notat $d^-(x)$: Numărul de arce care *intră* în nodul $x$ (unde $x$ este extremitate finală).\r\n2. **Gradul exterior** al nodului $x$, notat $d^+(x)$: Numărul de arce care *ies* din nodul $x$ (unde $x$ este extremitate inițială).\r\n\r\n**Proprietate fundamentală:** Într-un graf orientat cu $m$ arce, suma gradelor interioare ale tuturor nodurilor este egală cu suma gradelor exterioare ale tuturor nodurilor și este egală cu $m$.\r\n\r\n![Gradul interior si exterior](/media/lectia3/tabel_grade_go.png)\r\n\r\n---\r\n\r\n## 💻 Implementare C++: Calculul Gradelor\r\n\r\nSă presupunem că citim de la tastatură numărul de noduri $n$, numărul de arce $m$, și apoi cele $m$ arce (perechi ordonate). Vrem să calculăm și să afișăm gradul interior și exterior pentru fiecare nod.\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\nint main() {\r\n    int n, m;\r\n    cout << \"Introdu numarul de noduri si arce: \";\r\n    cin >> n >> m;\r\n\r\n    // Vectori pentru a stoca gradul interior și exterior\r\n    // Dimensiunea este n + 1 pentru indexare de la 1 la n\r\n    vector<int> grad_in(n + 1, 0);\r\n    vector<int> grad_out(n + 1, 0);\r\n\r\n    cout << \"Introdu cele \" << m << \" arce (u v, reprezentand sensul u -> v):\\n\";\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        \r\n        // Arcul iese din u (crește gradul exterior)\r\n        grad_out[u]++;\r\n        // Arcul intră în v (crește gradul interior)\r\n        grad_in[v]++;\r\n    }\r\n\r\n    cout << \"\\n--- Rezultate ---\\n\";\r\n    for (int i = 1; i <= n; ++i) {\r\n        cout << \"Nodul \" << i \r\n             << \" | Grad Interior (In): \" << grad_in[i] \r\n             << \" | Grad Exterior (Out): \" << grad_out[i] << \"\\n\";\r\n    }\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "GRAPH",
+    "order": 3
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 7,
+  "fields": {
+    "title": "Parcurgerea în Lățime (BFS - Breadth-First Search)",
+    "content": "O operație fundamentală pe grafuri este vizitarea tuturor nodurilor. Algoritmul **BFS (Breadth-First Search)** face acest lucru vizitând graful \"pe niveluri\", asemenea undelor create de o piatră aruncată în apă.\r\n\r\n\r\n\r\n## Cum funcționează BFS?\r\nPornim de la un nod sursă ales arbitrar. Algoritmul vizitează mai întâi toți vecinii direcți ai acestui nod (nivelul 1). Apoi, vizitează toți vecinii vecinilor (nivelul 2) și așa mai departe, până când toate nodurile accesibile au fost vizitate.\r\n\r\nPentru a ține minte ordinea în care trebuie să vizităm nodurile, BFS folosește o structură de date de tip **Coadă (Queue)**, care funcționează pe principiul **FIFO (First In, First Out)**.\r\n\r\n![Parcurgerea in latime](/media/lectia4/bfs-animatie-1x.gif)\r\n\r\nVârfurile grafului au fost parcurse în ordinea: 5 2 4 7 1 3 6 8 9.\r\n\r\n## Pseudocod (Ideea principală)\r\n1. Adăugăm nodul sursă în coadă și îl marcăm ca vizitat.\r\n2. Cât timp coada nu este goală:\r\n   * Extragem primul nod din coadă.\r\n   * Pentru fiecare vecin nevizitat al acestui nod:\r\n     * Îl marcăm ca vizitat.\r\n     * Îl adăugăm la finalul cozii.\r\n\r\n## Aplicații BFS\r\nBFS este extrem de util atunci când vrem să găsim **drumul minim (cel mai scurt)** între două noduri într-un graf neponderat (unde toate muchiile au costul 1), deoarece descoperă nodurile fix în ordinea distanței lor față de sursă.\r\n\r\n---\r\n\r\n## 💻 Implementare C++\r\n\r\nImplementarea standard folosește listele de adiacență pentru stocarea grafului, un vector de valori booleene pentru a urmări nodurile vizitate și structura `std::queue` din biblioteca standard C++. De asemenea, calculăm și distanța minimă de la nodul sursă către toate celelalte noduri.\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n#include <queue>\r\n\r\nusing namespace std;\r\n\r\nconst int NMAX = 100005;\r\nvector<int> adj[NMAX]; // Listele de adiacență\r\nbool viz[NMAX];        // Vectorul de vizitare\r\nint dist[NMAX];        // Vectorul pentru distanțe minime\r\n\r\nvoid bfs(int start) {\r\n    queue<int> q;\r\n\r\n    // Pasul 1: Adăugăm nodul sursă în coadă și îl marcăm ca vizitat\r\n    q.push(start);\r\n    viz[start] = true;\r\n    dist[start] = 0;\r\n\r\n    cout << \"Ordinea de vizitare BFS: \";\r\n\r\n    // Pasul 2: Cât timp coada nu este goală\r\n    while (!q.empty()) {\r\n        int nod = q.front();\r\n        q.pop(); // Extragem primul nod din coadă\r\n\r\n        cout << nod << \" \";\r\n\r\n        // Parcurgem toți vecinii nodului curent\r\n        for (int vecin : adj[nod]) {\r\n            if (!viz[vecin]) { // Dacă vecinul nu a mai fost vizitat\r\n                viz[vecin] = true; // Îl marcăm ca vizitat\r\n                dist[vecin] = dist[nod] + 1; // Distanța este distanța părintelui + 1\r\n                q.push(vecin); // Îl adăugăm la finalul cozii\r\n            }\r\n        }\r\n    }\r\n    cout << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    int n, m, sursa;\r\n    cout << \"Introdu numarul de noduri si muchii: \";\r\n    cin >> n >> m;\r\n\r\n    cout << \"Introdu cele \" << m << \" muchii:\\n\";\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        adj[u].push_back(v);\r\n        adj[v].push_back(u); // Graf neorientat\r\n    }\r\n\r\n    cout << \"Introdu nodul sursa pentru pornire BFS: \";\r\n    cin >> sursa;\r\n\r\n    bfs(sursa);\r\n\r\n    cout << \"\\n--- Distante minime fata de nodul sursa ---\\n\";\r\n    for (int i = 1; i <= n; ++i) {\r\n        if (viz[i]) {\r\n            cout << \"Nodul \" << i << \" -> Distanta: \" << dist[i] << \"\\n\";\r\n        } else {\r\n            cout << \"Nodul \" << i << \" -> Nu este accesibil din sursa\\n\";\r\n        }\r\n    }\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "GRAPH",
+    "order": 4
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 8,
+  "fields": {
+    "title": "Parcurgerea în Adâncime (DFS - Depth-First Search)",
+    "content": "Spre deosebire de BFS care explorează nivel cu nivel, **DFS (Depth-First Search)** are o abordare mult mai \"curajoasă\". El explorează cât mai adânc posibil de-a lungul fiecărei ramuri înainte de a se întoarce (backtracking).\r\n\r\n## Cum funcționează DFS?\r\nPornim de la un nod sursă. Alegem un vecin oarecare nevizitat și mergem la el. De acolo, alegem alt vecin nevizitat și mergem la el, continuând acest proces până ajungem la un nod care nu mai are vecini nevizitați (un drum înfundat). În acel moment, facem \"pași înapoi\" pe traseul urmat, până găsim un nod care mai are vecini neexplorați.\r\n\r\n![Parcurgerea in adancime](/media/lectia5/dfs-animatie-x1.gif)\r\n\r\nParcurgerea din nodul 5: 5 2 1 4 6 3 7 8 9\r\n\r\nDin punct de vedere tehnic, DFS poate fi implementat în două moduri:\r\n1. **Recursiv:** Este cel mai natural mod de a scrie DFS, lăsând calculatorul să gestioneze pașii înapoi prin stiva de apeluri a funcției.\r\n2. **Iterativ:** Folosind explicit o structură de date de tip **Stivă (Stack)**, bazată pe principiul **LIFO (Last In, First Out)**.\r\n\r\n## Aplicații DFS\r\nDFS este algoritmul ideal pentru a rezolva puzzle-uri (cum ar fi ieșirea dintr-un labirint), pentru a detecta existența ciclurilor într-un graf sau pentru a număra **componentele conexe** ale unui graf neorientat.\r\n\r\n---\r\n\r\n## 💻 Implementare C++ (Varianta Recursivă)\r\n\r\nVarianta recursivă este cea mai elegantă și scurtă metodă de a scrie DFS. Folosim un vector de adiacență pentru stocarea grafului și un vector de vizitare pentru a nu intra în cicluri infinite.\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\nconst int NMAX = 100005;\r\nvector<int> adj[NMAX]; // Listele de adiacență\r\nbool viz[NMAX];        // Vectorul de vizitare\r\n\r\n// Funcția recursivă pentru DFS\r\nvoid dfs(int nod) {\r\n    viz[nod] = true; // Marcăm nodul curent ca vizitat\r\n    cout << nod << \" \"; // Afișăm nodul\r\n\r\n    // Parcurgem toți vecinii nodului curent\r\n    for (int vecin : adj[nod]) {\r\n        if (!viz[vecin]) { // Dacă vecinul nu a fost vizitat\r\n            dfs(vecin); // Apelăm recursiv DFS pentru el (avansăm în adâncime)\r\n        }\r\n    }\r\n}\r\n\r\nint main() {\r\n    int n, m, sursa;\r\n    cout << \"Introdu numarul de noduri si muchii: \";\r\n    cin >> n >> m;\r\n\r\n    cout << \"Introdu cele \" << m << \" muchii:\\n\";\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        adj[u].push_back(v);\r\n        adj[v].push_back(u); // Presupunem graf neorientat\r\n    }\r\n\r\n    cout << \"Introdu nodul sursa pentru pornire DFS: \";\r\n    cin >> sursa;\r\n\r\n    cout << \"Ordinea de vizitare DFS: \";\r\n    dfs(sursa);\r\n    cout << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "GRAPH",
+    "order": 5
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 9,
+  "fields": {
+    "title": "Test de Evaluare: Fundamentele Grafurilor",
+    "content": "Ai ajuns la finalul primului modul! Până acum ai învățat cum să definești un graf, cum să îl reprezinți eficient în memoria calculatorului și cum să îl parcurgi folosind algoritmii BFS și DFS.\r\n\r\nRăspunde corect la următoarele 5 întrebări pentru a finaliza acest capitol și a debloca secțiunea următoare, unde vom explora algoritmi avansați pentru găsirea drumurilor optime! Mult succes! 🚀",
+    "category": "GRAPH",
+    "order": 6
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 10,
+  "fields": {
+    "title": "Grafuri Ponderate și Algoritmul lui Dijkstra",
+    "content": "Până acum am considerat că toate muchiile unui graf sunt egale (costul traversării lor este 1). În lumea reală, străzile au lungimi diferite, iar rețelele au viteze diferite. Aici intervin **grafurile ponderate**, unde fiecare muchie are atașată o valoare (pondere sau cost), notată cu $w(u, v)$.\r\n\r\n## Problema drumului minim\r\nCum găsim cel mai scurt (sau cel mai ieftin) drum de la un oraș (nod sursă) la toate celelalte orașe?\r\n\r\n**Algoritmul lui Dijkstra** (inventat de Edsger W. Dijkstra în 1956) rezolvă această problemă pentru grafurile cu costuri **strict pozitive**. \r\n\r\n![Alg. lui Dijkstra](/media/lectia6/Dijkstra_Animation.gif)\r\n\r\n## Cum funcționează?\r\nDijkstra menține un vector de distanțe față de sursă, inițializat cu $0$ pentru sursă și cu $\\infty$ (infinit) pentru restul nodurilor.\r\n\r\nLa fiecare pas, algoritmul alege nodul nevizitat cu **cea mai mică distanță curentă** și încearcă să \"relaxeze\" muchiile care pleacă din el. Odată ce un nod a fost ales ca având distanța minimă, acea distanță este considerată finală și nodul este marcat ca vizitat.\r\n\r\n**Procesul de relaxare:** Dacă distanța până la nodul $u$ adunată cu costul muchiei $(u, v)$ este mai mică decât distanța cunoscută până la $v$, actualizăm distanța:\r\n\r\n$$d[v] = \\min(d[v], d[u] + w(u, v))$$\r\n\r\n## Complexitate\r\nFolosind o matrice de adiacență pentru un graf cu $V$ noduri, algoritmul rulează în $O(V^2)$. Dacă este implementat eficient folosind o structură de tip *Min-Heap* (Priority Queue), complexitatea scade la $O(E \\log V)$.\r\n\r\n---\r\n\r\n## 💻 Implementare C++ (Eficientă $O(E \\log V)$)\r\n\r\nPentru a implementa varianta optimizată, folosim listele de adiacență care stochează perechi de forma `{vecin, cost_muchie}`, iar pentru a alege mereu nodul cu distanța minimă folosim structura `std::priority_queue` (coadă de priorități).\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n#include <queue>\r\n\r\nusing namespace std;\r\n\r\nconst int INF = 1e9; // Reprezentăm infinitul printr-o valoare foarte mare\r\nconst int NMAX = 100005;\r\n\r\n// Listele de adiacență rețin perechi: {nod_destinație, cost_muchie}\r\nvector<pair<int, int>> adj[NMAX];\r\nint dist[NMAX]; // Vectorul de distanțe minime\r\n\r\nvoid dijkstra(int sursa, int n) {\r\n    // Inițializăm distanțele cu infinit\r\n    for (int i = 1; i <= n; ++i) {\r\n        dist[i] = INF;\r\n    }\r\n\r\n    // Coada de priorități extrage mereu elementul minim.\r\n    // Stocăm perechi {distanta_pana_la_nod, nod}\r\n    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;\r\n\r\n    dist[sursa] = 0;\r\n    pq.push({0, sursa});\r\n\r\n    while (!pq.empty()) {\r\n        int d_curent = pq.top().first;\r\n        int u = pq.top().second;\r\n        pq.pop();\r\n\r\n        // Dacă am găsit deja un drum mai bun, ignorăm\r\n        if (d_curent > dist[u]) continue;\r\n\r\n        // Parcurgem vecinii\r\n        for (auto muchie : adj[u]) {\r\n            int v = muchie.first;\r\n            int cost = muchie.second;\r\n\r\n            // Relaxarea muchiei\r\n            if (dist[u] + cost < dist[v]) {\r\n                dist[v] = dist[u] + cost;\r\n                pq.push({dist[v], v});\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nint main() {\r\n    int n, m, sursa;\r\n    cout << \"Introdu numarul de noduri si muchii: \";\r\n    cin >> n >> m;\r\n\r\n    cout << \"Introdu cele \" << m << \" muchii (u v cost):\\n\";\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v, cost;\r\n        cin >> u >> v >> cost;\r\n        adj[u].push_back({v, cost});\r\n        adj[v].push_back({u, cost}); // Graf neorientat\r\n    }\r\n\r\n    cout << \"Introdu nodul sursa: \";\r\n    cin >> sursa;\r\n\r\n    dijkstra(sursa, n);\r\n\r\n    cout << \"\\n--- Distante minime fata de nodul \" << sursa << \" ---\\n\";\r\n    for (int i = 1; i <= n; ++i) {\r\n        if (dist[i] == INF) {\r\n            cout << \"Nodul \" << i << \" -> Inaccesibil\\n\";\r\n        } else {\r\n            cout << \"Nodul \" << i << \" -> Cost drum: \" << dist[i] << \"\\n\";\r\n        }\r\n    }\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "GRAPH",
+    "order": 7
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 11,
+  "fields": {
+    "title": "Algoritmul Roy-Warshall și Floyd-Warshall",
+    "content": "Dijkstra este excelent pentru a găsi distanțele de la **un singur nod** la toate celelalte. Dar ce facem dacă vrem să calculăm drumurile minime între **oricare două perechi de noduri** din rețea?\r\n\r\nAici intervine algoritmul **Floyd-Warshall** (pentru distanțe) și **Roy-Warshall** (pentru închiderea tranzitivă / conectivitate).\r\n\r\n## Principiul de funcționare\r\n\r\n![Floyd-Warshall](/media/lectia7/Floyd_warshall.gif)\r\nAlgoritmul se bazează pe paradigma **Programării Dinamice**. El verifică sistematic dacă, pentru orice pereche de noduri $(i, j)$, există un nod intermediar $k$ care oferă un traseu mai scurt decât cel cunoscut anterior.\r\n\r\nFormula de recurență este simplă și extrem de elegantă:\r\n$$D[i][j] = \\min(D[i][j], D[i][k] + D[k][j])$$\r\n\r\nUnde $D$ este matricea distanțelor. Inițial, $D[i][j]$ este egal cu ponderea muchiei directe de la $i$ la $j$ (sau $\\infty$ dacă nu există muchie directă).\r\n\r\n## Închiderea Tranzitivă (Roy-Warshall)\r\nDacă graful este neponderat și vrem doar să aflăm dacă **există** măcar un drum (indiferent de lungime) de la $i$ la $j$, folosim operații logice (`SAU` și `ȘI`). Formula devine:\r\n$$A[i][j] = A[i][j] \\lor (A[i][k] \\land A[k][j])$$\r\n\r\n## Complexitate\r\nDeoarece algoritmul folosește trei bucle `for` imbricate (pentru $k$, pentru $i$, pentru $j$), complexitatea sa de timp este **$O(V^3)$**, unde $V$ este numărul de noduri. Este ideal pentru grafuri mici și dense, dar foarte lent pentru rețele gigantice.\r\n\r\n---\r\n\r\n## 💻 Implementare C++ (Floyd-Warshall)\r\n\r\nCodul de mai jos folosește o matrice de distanțe. Inițial, distanța de la un nod la el însuși este 0, iar către celelalte este infinit (reprezentat printr-o valoare uriașă, ex: `1e9`). Când citim arcele, actualizăm costurile directe.\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <algorithm>\r\n\r\nusing namespace std;\r\n\r\nconst int INF = 1e9; // Reprezentăm infinitul\r\nconst int NMAX = 105; // Număr maxim de noduri (limitat din cauza O(V^3))\r\n\r\nint D[NMAX][NMAX]; // Matricea distanțelor minime\r\n\r\nint main() {\r\n    int n, m;\r\n    cout << \"Introdu numarul de noduri si muchii: \";\r\n    cin >> n >> m;\r\n\r\n    // 1. Inițializarea matricei de distanțe\r\n    for (int i = 1; i <= n; ++i) {\r\n        for (int j = 1; j <= n; ++j) {\r\n            if (i == j) {\r\n                D[i][j] = 0; // Distanța către el însuși este 0\r\n            } else {\r\n                D[i][j] = INF; // Restul distanțelor sunt infinit\r\n            }\r\n        }\r\n    }\r\n\r\n    // 2. Citirea costurilor directe\r\n    cout << \"Introdu cele \" << m << \" arce (u v cost):\\n\";\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v, cost;\r\n        cin >> u >> v >> cost;\r\n        D[u][v] = cost; \r\n        // Dacă graful este neorientat, de-comentează linia de mai jos:\r\n        // D[v][u] = cost;\r\n    }\r\n\r\n    // 3. Algoritmul Floyd-Warshall\r\n    for (int k = 1; k <= n; ++k) {\r\n        for (int i = 1; i <= n; ++i) {\r\n            for (int j = 1; j <= n; ++j) {\r\n                // Verificăm dacă există drumuri prin k pentru a evita overflow cu INF\r\n                if (D[i][k] != INF && D[k][j] != INF) {\r\n                    D[i][j] = min(D[i][j], D[i][k] + D[k][j]);\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    // 4. Afișarea matricei finale\r\n    cout << \"\\n--- Matricea distantelor minime ---\\n\";\r\n    for (int i = 1; i <= n; ++i) {\r\n        for (int j = 1; j <= n; ++j) {\r\n            if (D[i][j] == INF) cout << \"INF \";\r\n            else cout << D[i][j] << \" \";\r\n        }\r\n        cout << \"\\n\";\r\n    }\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "GRAPH",
+    "order": 8
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 12,
+  "fields": {
+    "title": "Arbori de Acoperire Minimă (MST) și Algoritmul lui Prim",
+    "content": "Imaginează-ți că trebuie să conectezi mai multe calculatoare la o singură rețea de internet folosind cabluri, dar vrei să folosești **cea mai mică lungime totală de cablu posibilă**. Aici intervin Arborii de Acoperire Minimă (MST - Minimum Spanning Tree).\r\n\r\n## Ce este un Arbore de Acoperire?\r\nDat fiind un graf neorientat și ponderat $G = (V, E)$, un **arbore de acoperire** este un subgraf care:\r\n1. Conține toate cele $V$ noduri ale grafului inițial.\r\n2. Este complet conectat (dintr-un nod poți ajunge în oricare altul).\r\n3. Nu conține niciun ciclu (de aceea se numește \"arbore\").\r\n4. Are exact $V - 1$ muchii.\r\n\r\nDintre toți arborii de acoperire posibili, **Arborele de Acoperire Minimă (MST)** este cel pentru care suma costurilor muchiilor este cea mai mică.\r\n\r\n![MST](/media/lectia8/multiple_mst.svg.png)\r\n\r\n## Algoritmul lui Prim\r\nAlgoritmul lui Prim este o metodă de tip *Greedy* pentru a construi un MST:\r\n1. Începem cu un nod arbitrar și îl adăugăm în arborele nostru (inițial gol).\r\n2. Ne uităm la toate muchiile care conectează nodurile din arbore cu nodurile din afara arborelui.\r\n3. O alegem pe cea cu **cel mai mic cost** și adăugăm muchia și noul nod în arbore.\r\n4. Repetăm procesul până când toate nodurile au fost adăugate.\r\n\r\n![Algoritmul lui Prim](/media/lectia8/PrimAlgDemo.gif)\r\n\r\nLa fel ca Dijkstra, Prim poate rula foarte rapid, în timp $O(E \\log V)$, dacă folosim o structură de tip *Priority Queue*.\r\n\r\n---\r\n\r\n## 💻 Implementare C++ (Algoritmul lui Prim)\r\n\r\nAceastă implementare folosește o coadă de priorități (Priority Queue) pentru a extrage mereu, în mod eficient, muchia cu costul minim care extinde arborele de acoperire. Folosim un vector de vizitare pentru a ne asigura că nu creăm cicluri.\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n#include <queue>\r\n\r\nusing namespace std;\r\n\r\nconst int NMAX = 100005;\r\n\r\n// Listele de adiacență rețin perechi de forma: {nod_destinație, cost_muchie}\r\nvector<pair<int, int>> adj[NMAX];\r\nbool in_mst[NMAX]; // Marchează nodurile adăugate deja în MST\r\n\r\nint prim(int start, int n) {\r\n    int cost_total = 0;\r\n    int muchii_adaugate = 0;\r\n\r\n    // Coada de priorități pentru a extrage costul minim\r\n    // Stocăm perechi de forma: {cost_muchie, nod_destinație}\r\n    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;\r\n\r\n    // Începem de la nodul sursă cu un cost de 0\r\n    pq.push({0, start});\r\n\r\n    while (!pq.empty() && muchii_adaugate < n) {\r\n        int cost = pq.top().first;\r\n        int u = pq.top().second;\r\n        pq.pop();\r\n\r\n        // Dacă nodul este deja în arbore, ignorăm muchia (ar forma un ciclu)\r\n        if (in_mst[u]) continue;\r\n\r\n        // Adăugăm nodul în MST și adunăm costul\r\n        in_mst[u] = true;\r\n        cost_total += cost;\r\n        muchii_adaugate++;\r\n\r\n        // Explorăm vecinii nodului abia adăugat\r\n        for (auto muchie : adj[u]) {\r\n            int v = muchie.first;\r\n            int cost_vecin = muchie.second;\r\n\r\n            // Adăugăm în coadă doar vecinii care nu sunt încă în MST\r\n            if (!in_mst[v]) {\r\n                pq.push({cost_vecin, v});\r\n            }\r\n        }\r\n    }\r\n\r\n    return cost_total;\r\n}\r\n\r\nint main() {\r\n    int n, m;\r\n    cout << \"Introdu numarul de noduri si muchii: \";\r\n    cin >> n >> m;\r\n\r\n    cout << \"Introdu cele \" << m << \" muchii (u v cost):\\n\";\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v, cost;\r\n        cin >> u >> v >> cost;\r\n        adj[u].push_back({v, cost});\r\n        adj[v].push_back({u, cost}); // Graful trebuie să fie neorientat\r\n    }\r\n\r\n    // Putem începe Prim din orice nod (ex: nodul 1)\r\n    int cost_minim_total = prim(1, n);\r\n\r\n    cout << \"\\nCostul total al Arborelui de Acoperire Minima (MST) este: \" << cost_minim_total << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "GRAPH",
+    "order": 9
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 13,
+  "fields": {
+    "title": "Algoritmul lui Kruskal",
+    "content": "Dacă Algoritmul lui Prim construiește arborele \"din aproape în aproape\", **Algoritmul lui Kruskal** are o abordare diferită, tot de tip *Greedy*, uitându-se la graful de ansamblu.\r\n\r\n## Cum funcționează Kruskal?\r\n1. Se iau toate muchiile din graf și se **sortează crescător** în funcție de costul lor.\r\n2. Se parcurge lista de muchii sortate de la cea mai ieftină la cea mai scumpă.\r\n3. Pentru fiecare muchie, verificăm dacă adăugarea ei în MST ar forma un **ciclu**.\r\n   * Dacă **NU** formează ciclu, o adăugăm în soluția finală.\r\n   * Dacă formează ciclu, o ignorăm și trecem la următoarea.\r\n4. Ne oprim când am adăugat exact $V - 1$ muchii.\r\n\r\n ![Kruskal](/media/lectia9/MST_kruskal_en.gif)\r\n\r\n## Detectarea eficientă a ciclurilor\r\nPartea complicată la Kruskal este pasul 3. Cum știm rapid dacă două noduri sunt deja conectate (ceea ce ar însemna că adăugarea unei noi muchii între ele închide un ciclu)? \r\n\r\nRăspunsul este utilizarea unei structuri de date speciale numite **Păduri de Mulțimi Disjuncte (Disjoint-Set / Union-Find)**. Această structură ne permite să verificăm dacă două noduri fac parte din același \"grup\" (cu operația `Find`) și să le unim eficient (cu operația `Union`).\r\n\r\nComplexitatea algoritmului lui Kruskal este dominată de pasul de sortare a muchiilor, rulând în $O(E \\log E)$ sau $O(E \\log V)$.\r\n\r\n---\r\n\r\n## 💻 Implementare C++ (Kruskal cu Union-Find)\r\n\r\nPentru a scrie un Kruskal eficient, folosim un vector de structuri (pentru a putea sorta ușor muchiile) și doi vectori suplimentari pentru structura Union-Find: unul pentru \"tatăl\" fiecărui nod și unul pentru dimensiunea fiecărui grup, pentru a optimiza unirile.\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n#include <algorithm>\r\n\r\nusing namespace std;\r\n\r\nconst int NMAX = 100005;\r\n\r\n// Structură pentru a reține o muchie\r\nstruct Muchie {\r\n    int u, v, cost;\r\n};\r\n\r\n// Funcție de comparare pentru sortarea muchiilor\r\nbool cmp(Muchie a, Muchie b) {\r\n    return a.cost < b.cost;\r\n}\r\n\r\nint tata[NMAX];\r\nint dimensiune[NMAX];\r\n\r\n// Găsește rădăcina arborelui din care face parte x (cu compresia drumului)\r\nint gaseste_radacina(int x) {\r\n    if (tata[x] == x)\r\n        return x;\r\n    return tata[x] = gaseste_radacina(tata[x]); // Optimizare: scurtăm drumul spre rădăcină\r\n}\r\n\r\n// Unește arborii din care fac parte x și y\r\nvoid uneste(int x, int y) {\r\n    int rx = gaseste_radacina(x);\r\n    int ry = gaseste_radacina(y);\r\n\r\n    if (rx != ry) {\r\n        // Union by size (atașăm arborele mai mic la cel mai mare)\r\n        if (dimensiune[rx] < dimensiune[ry]) {\r\n            tata[rx] = ry;\r\n            dimensiune[ry] += dimensiune[rx];\r\n        } else {\r\n            tata[ry] = rx;\r\n            dimensiune[rx] += dimensiune[ry];\r\n        }\r\n    }\r\n}\r\n\r\nint main() {\r\n    int n, m;\r\n    cout << \"Introdu numarul de noduri si muchii: \";\r\n    cin >> n >> m;\r\n\r\n    vector<Muchie> muchii(m);\r\n\r\n    cout << \"Introdu cele \" << m << \" muchii (u v cost):\\n\";\r\n    for (int i = 0; i < m; ++i) {\r\n        cin >> muchii[i].u >> muchii[i].v >> muchii[i].cost;\r\n    }\r\n\r\n    // 1. Inițializăm structura Disjoint-Set\r\n    for (int i = 1; i <= n; ++i) {\r\n        tata[i] = i; // Fiecare nod este propriul său părinte inițial\r\n        dimensiune[i] = 1; // Fiecare grup are inițial dimensiunea 1\r\n    }\r\n\r\n    // 2. Sortăm muchiile crescător după cost\r\n    sort(muchii.begin(), muchii.end(), cmp);\r\n\r\n    int cost_total = 0;\r\n    int muchii_adaugate = 0;\r\n\r\n    // 3. Parcurgem muchiile sortate\r\n    for (auto muchie : muchii) {\r\n        // Dacă u și v fac parte din grupuri diferite (adică nu formează ciclu)\r\n        if (gaseste_radacina(muchie.u) != gaseste_radacina(muchie.v)) {\r\n            uneste(muchie.u, muchie.v); // Le unim grupurile\r\n            cost_total += muchie.cost;\r\n            muchii_adaugate++;\r\n\r\n            // Oprim algoritmul când am adăugat V - 1 muchii\r\n            if (muchii_adaugate == n - 1) {\r\n                break;\r\n            }\r\n        }\r\n    }\r\n\r\n    cout << \"\\nCostul total al Arborelui de Acoperire Minima (Kruskal) este: \" << cost_total << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "GRAPH",
+    "order": 10
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 14,
+  "fields": {
+    "title": "Sortarea Topologică",
+    "content": "Imaginează-ți că ești la universitate și trebuie să îți alegi cursurile. Nu poți face \"Algoritmica Avansată\" până nu promovezi \"Introducere în Programare\". Aceste dependențe pot fi modelate ca un graf orientat, unde nodurile sunt cursurile, iar arcele indică ordinea (dinspre cursul cerință spre cursul final).\r\n\r\n**Sortarea Topologică** este o ordonare liniară a nodurilor unui graf astfel încât, pentru fiecare arc $(u, v)$, nodul $u$ apare înaintea nodului $v$ în acea ordonare.\r\n\r\n![Sortare Topologica](/media/lectia10/SortareTopologica1.png)\r\n![Sortare Topologica](/media/lectia10/SortareTopologica2.png)\r\n\r\n## Condiția esențială\r\nSortarea topologică este posibilă **DOAR** dacă graful nu are cicluri (dacă A necesită B, B necesită C, iar C necesită A, sistemul este blocat). \r\n\r\nAșadar, se aplică exclusiv pe **Grafuri Orientate Aciclice (DAG - Directed Acyclic Graph)**.\r\n\r\n## Cum se implementează?\r\nCea mai populară metodă folosește parcurgerea în adâncime (**DFS**):\r\n1. Rulăm DFS pe graf.\r\n2. Când un nod termină de explorat absolut toți vecinii săi (când funcția recursivă DFS se întoarce din el), îl punem într-o Stivă.\r\n3. La final, ordinea nodurilor din stivă (de sus în jos) reprezintă sortarea topologică.\r\n\r\n---\r\n\r\n## 💻 Implementare C++ (Sortare Topologică cu DFS)\r\n\r\nImplementarea folosește structura `std::stack` din C++. Este foarte important să iterăm prin toate nodurile în funcția `main`, deoarece un graf orientat poate avea mai multe componente (cursuri care nu au nicio legătură între ele), iar DFS-ul pornit dintr-un singur nod ar putea să nu le viziteze pe toate.\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n#include <stack>\r\n\r\nusing namespace std;\r\n\r\nconst int NMAX = 100005;\r\nvector<int> adj[NMAX]; // Listele de adiacență\r\nbool viz[NMAX];        // Vectorul de vizitare\r\nstack<int> st;         // Stiva pentru a stoca sortarea topologică\r\n\r\nvoid dfs(int nod) {\r\n    viz[nod] = true; // Marcăm nodul curent ca vizitat\r\n\r\n    // Explorăm toți vecinii (toate cursurile care depind de acest curs)\r\n    for (int vecin : adj[nod]) {\r\n        if (!viz[vecin]) {\r\n            dfs(vecin);\r\n        }\r\n    }\r\n\r\n    // După ce am explorat toți vecinii, nodul și-a terminat treaba\r\n    // Îl adăugăm în stivă\r\n    st.push(nod);\r\n}\r\n\r\nint main() {\r\n    int n, m;\r\n    cout << \"Introdu numarul de noduri si arce: \";\r\n    cin >> n >> m;\r\n\r\n    cout << \"Introdu cele \" << m << \" arce (u v, reprezentand u -> v):\\n\";\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        adj[u].push_back(v); // Graf orientat\r\n    }\r\n\r\n    // Parcurgem toate nodurile. Dacă un nod nu este vizitat, pornim DFS din el.\r\n    // Această buclă ne asigură că acoperim toate componentele grafului.\r\n    for (int i = 1; i <= n; ++i) {\r\n        if (!viz[i]) {\r\n            dfs(i);\r\n        }\r\n    }\r\n\r\n    cout << \"\\nSortarea Topologica este:\\n\";\r\n    // Extragem nodurile din stivă, obținând ordinea corectă\r\n    while (!st.empty()) {\r\n        cout << st.top() << \" \";\r\n        st.pop();\r\n    }\r\n    cout << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "GRAPH",
+    "order": 11
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 15,
+  "fields": {
+    "title": "Test de Evaluare: Algoritmi Avansați pe Grafuri",
+    "content": "Ai supraviețuit celui mai dificil modul din punct de vedere algoritmic! Acum cunoști metodele prin care funcționează sistemele GPS de navigare, rețelele de comunicații și sistemele de planificare a task-urilor.\r\n\r\nDemonstrează că stăpânești aceste concepte complexe răspunzând la cele 5 întrebări de mai jos. Succes! 🚀",
+    "category": "GRAPH",
+    "order": 12
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 16,
+  "fields": {
+    "title": "Conceptul de Arbore",
+    "content": "Un **arbore** este o structură de date neliniară, ierarhică, utilizată pentru a modela relații de subordonare (cum ar fi structura de directoare și fișiere dintr-un sistem de operare sau organigrama unei companii).\r\n\r\n![Arbore liber](/media/lectia11/arbore-liber.png)\r\n\r\nDin punct de vedere al teoriei grafurilor, un arbore este definit ca fiind un **graf conex și aciclic**. Acest lucru înseamnă că între oricare două noduri din arbore există un singur drum unic și este imposibil să se formeze circuite închise. Se mai numește și **arbore liber**.\r\n\r\n## Terminologie și Concepte Cheie\r\nArborii folosesc un vocabular specific, împrumutat parțial din biologie și relații genealogice:\r\n* **Rădăcină (Root):** Nodul situat pe cel mai înalt nivel al ierarhiei. Este unicul nod din arbore care nu are un părinte.\r\n* **Părinte (Parent):** Nodul situat direct deasupra altui nod și conectat direct de acesta printr-o muchie.\r\n* **Fiu / Descendent direct (Child):** Nodul situat imediat sub un alt nod.\r\n* **Frunză (Leaf / Nod terminal):** Un nod care nu are niciun descendent direct (numărul său de fii este 0).\r\n* **Nod intern:** Orice nod care nu este nici rădăcină, nici frunză (se află în interiorul ierarhiei).\r\n\r\n## Nivel și Înălțime\r\n* **Nivelul unui nod:** Reprezintă distanța (numărul de muchii) de la rădăcină până la nodul respectiv. Rădăcina se află întotdeauna pe nivelul $0$.\r\n* **Înălțimea arborelui ($h$):** Reprezintă nivelul maxim întâlnit în cadrul arborelui (lungimea celui mai lung drum de la rădăcină la o frunză).\r\n\r\n## Exemplu de arbore\r\n![Arbore liber](/media/lectia11/arbore_explicat.png)\r\n\r\nÎn exemplul de mai sus:\r\n* Rădăcina arborelui este nodul 3;\r\n* Ascendenții nodului 4 sunt 5, 2 și 3. Ascendentul direct (tatăl) al nodului 4 este nodul 5;\r\n* Descendenții nodului 2 sunt 1 7 10 5 4 6. Descendenții direcți ai nodului 2 sunt 1 5;\r\n* Nodurile 1 și 5 sunt frați;\r\n* Nodurile 6 7 8 10 12 sunt frunze;\r\n* Nodurile 9 8 11 12 formează un subarbore;\r\n\r\n**Descompunerea pe niveluri:**\r\n* **Nivelul 0** conține doar rădăcina: 3;\r\n* **Nivelul 1** conține nodurile 2 9;\r\n* **Nivelul 2** conține nodurile 1 5 8 11;\r\n* **Nivelul 3** conține nodurile 7 10 4 12;\r\n* **Nivelul 4** conține nodul 6;\r\n* **Înălțimea arborelui** este 4;\r\n---\r\n\r\n## 💻 Implementare C++: Calculul Ierarhiei\r\n\r\nAcest program primește un arbore format din $V-1$ muchii și un nod ales drept rădăcină. Folosind o parcurgere DFS, algoritmul stabilește părintele fiecărui nod, calculează nivelul și înălțimea totală, și detectează care noduri sunt frunze.\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\nconst int NMAX = 100005;\r\nvector<int> adj[NMAX]; // Listele de adiacență\r\nint nivel[NMAX];       // Reține distanța de la rădăcină\r\nint tata[NMAX];        // Reține părintele fiecărui nod\r\nint inaltime_maxima = 0;\r\n\r\n// Parcurgere DFS pentru a stabili relațiile ierarhice\r\nvoid dfs(int nod, int parinte, int nivel_curent) {\r\n    nivel[nod] = nivel_curent;\r\n    tata[nod] = parinte;\r\n    \r\n    // Actualizăm înălțimea arborelui dacă am ajuns mai adânc\r\n    if (nivel_curent > inaltime_maxima) {\r\n        inaltime_maxima = nivel_curent;\r\n    }\r\n\r\n    // Parcurgem vecinii\r\n    for (int vecin : adj[nod]) {\r\n        if (vecin != parinte) { // Evităm să ne întoarcem la nodul părinte\r\n            dfs(vecin, nod, nivel_curent + 1); // Coborâm un nivel\r\n        }\r\n    }\r\n}\r\n\r\nint main() {\r\n    int n;\r\n    cout << \"Introdu numarul de noduri: \";\r\n    cin >> n;\r\n\r\n    // Un arbore are mereu n - 1 muchii\r\n    cout << \"Introdu cele \" << n - 1 << \" muchii:\\n\";\r\n    for (int i = 0; i < n - 1; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        adj[u].push_back(v);\r\n        adj[v].push_back(u); // Arborele este un graf neorientat\r\n    }\r\n\r\n    int radacina;\r\n    cout << \"Introdu nodul radacina: \";\r\n    cin >> radacina;\r\n\r\n    // Pornim DFS din rădăcină. Rădăcina are nivelul 0 și nu are părinte (îi dăm valoarea 0)\r\n    dfs(radacina, 0, 0);\r\n\r\n    cout << \"\\n--- Informatii Arbore ---\\n\";\r\n    cout << \"Inaltimea arborelui: \" << inaltime_maxima << \"\\n\\n\";\r\n\r\n    for (int i = 1; i <= n; ++i) {\r\n        cout << \"Nodul \" << i << \" -> Nivel: \" << nivel[i];\r\n        \r\n        if (i == radacina) {\r\n            cout << \" [RADACINA]\\n\";\r\n        } else {\r\n            cout << \" | Parinte: \" << tata[i];\r\n            \r\n            // Verificăm dacă este frunză (are gradul 1 și nu e rădăcină)\r\n            if (adj[i].size() == 1) {\r\n                cout << \" [FRUNZA]\";\r\n            }\r\n            cout << \"\\n\";\r\n        }\r\n    }\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "TREE",
+    "order": 13
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 17,
+  "fields": {
+    "title": "Arbori Binari",
+    "content": "Un **arbore binar** reprezintă una dintre cele mai utilizate structuri de date ierarhice din informatică. Proprietatea sa fundamentală este că **fiecare nod poate avea maximum doi fii**.\r\n\r\n![Arbore binar](/media/lectia12/arbore-binar-1.jpg)\r\n\r\nAcești descendenți sunt clar ordonați și identificați sub denumirea de:\r\n1. **Fiul stâng** (care coordonează subarborele stâng).\r\n2. **Fiul drept** (care coordonează subarborele drept).\r\n\r\n## Tipuri particulare de arbori binari\r\nÎn funcție de organizarea geometrică și distribuția nodurilor pe niveluri, clasificăm:\r\n* **Arbore binar strict (propriu):** Fiecare nod intern are **exact doi fii**. În acest tip de arbore nu există noduri cu un singur descendent; nodurile au fie $0$ fii (sunt frunze), fie $2$ fii.\r\n\r\n![Arbore binar](/media/lectia12/arbore-binar-strict.png)\r\n\r\n* **Arbore binar plin (Full Binary Tree):** Este arborele în care toate nivelurile, până la înălțimea maximă $h$, sunt complet ocupate de noduri. Numărul total de noduri dintr-un astfel de arbore este fixat de formula: $2^{h+1} - 1$.\r\n\r\n![Arbore binar](/media/lectia12/arbore-binar-plin.png)\r\n\r\n* **Arbore binar complet:** Toate nivelurile ierarhiei sunt complet pline, cu excepția ultimului nivel, care se completează obligatoriu de la stânga la dreapta.\r\n\r\n![Arbore binar](/media/lectia12/arbore-binar-complet.png)\r\n\r\n---\r\n\r\n## 💻 Implementare C++: Structura unui Nod\r\n\r\nSpre deosebire de grafurile obișnuite unde foloseam vectori de adiacență, arborii binari se construiesc cel mai eficient folosind **alocarea dinamică a memoriei** și pointeri. \r\n\r\nFiecare nod va fi o structură (`struct`) care reține o valoare și două legături (pointeri) către fiii săi.\r\n\r\n```cpp\r\n#include <iostream>\r\n\r\nusing namespace std;\r\n\r\n// Definirea structurii pentru un nod dintr-un arbore binar\r\nstruct Nod {\r\n    int valoare;\r\n    Nod* stanga;  // Pointer catre fiul stang\r\n    Nod* dreapta; // Pointer catre fiul drept\r\n\r\n    // Constructor pentru a initializa usor un nod nou\r\n    Nod(int val) {\r\n        valoare = val;\r\n        stanga = nullptr;  // Initial nu are fii\r\n        dreapta = nullptr;\r\n    }\r\n};\r\n\r\n// O funcție simplă pentru a demonstra că arborele funcționează\r\n// (Vom învăța mai multe despre asta în lecția următoare)\r\nvoid afiseaza_inordine(Nod* radacina) {\r\n    if (radacina == nullptr) return; // Ne oprim daca nodul nu exista\r\n    \r\n    afiseaza_inordine(radacina->stanga);  // Vizitam subarborele stang\r\n    cout << radacina->valoare << \" \";     // Afisam valoarea nodului\r\n    afiseaza_inordine(radacina->dreapta); // Vizitam subarborele drept\r\n}\r\n\r\nint main() {\r\n    // Construim manual urmatorul arbore binar:\r\n    //        1\r\n    //       / \\\r\n    //      2   3\r\n    //     / \\\r\n    //    4   5\r\n\r\n    // 1. Cream radacina\r\n    Nod* radacina = new Nod(1);\r\n\r\n    // 2. Legam fiii de pe nivelul 1\r\n    radacina->stanga = new Nod(2);\r\n    radacina->dreapta = new Nod(3);\r\n\r\n    // 3. Legam fiii de pe nivelul 2\r\n    radacina->stanga->stanga = new Nod(4);\r\n    radacina->stanga->dreapta = new Nod(5);\r\n\r\n    cout << \"Arborele binar a fost construit in memorie cu succes!\\n\";\r\n    cout << \"Valorile nodurilor (citite de la stanga la dreapta) sunt: \";\r\n    afiseaza_inordine(radacina);\r\n    cout << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "TREE",
+    "order": 14
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 18,
+  "fields": {
+    "title": "Parcurgerea Arborilor Binari",
+    "content": "Pentru a procesa informația stocată într-un arbore binar, avem nevoie de algoritmi sistematici care să viziteze fiecare nod exact o singură dată. Deoarece structura arborelui este recursivă, metodele de parcurgere se bazează pe trei operații fundamentale: **R** (vizitarea Rădăcinii), **S** (parcurgerea subarborelui Stâng) și **D** (parcurgerea subarborelui Drept).\r\n\r\nExistă trei metode clasice de parcurgere în adâncime, în funcție de momentul în care procesăm rădăcina:\r\n\r\n## 1. Parcurgerea în Preordine (RSD)\r\nNodurile se vizitează în ordinea: **Rădăcină $\\rightarrow$ Subarbore Stâng $\\rightarrow$ Subarbore Drept**.\r\n* Se procesează mai întâi informația din rădăcina curentă, după care se coboară recursiv pe ramura stângă, iar la final se explorează ramura dreaptă.\r\n\r\n![Preordine](/media/lectia13/Preorder-traversal.gif)\r\n\r\n## 2. Parcurgerea în Inordine (SRD)\r\nNodurile se vizitează în ordinea: **Subarbore Stâng $\\rightarrow$ Rădăcină $\\rightarrow$ Subarbore Drept**.\r\n* Se explorează complet subarborele stâng, se revine în nodul rădăcină pentru procesare, iar apoi se trece la analiza subarborelui drept. Această metodă este vitală pentru sortarea datelor în arborii de căutare.\r\n\r\n![Inordine](/media/lectia13/Inorder-traversal.gif)\r\n\r\n## 3. Parcurgerea în Postordine (SDR)\r\nNodurile se vizitează în ordinea: **Subarbore Stâng $\\rightarrow$ Subarbore Drept $\\rightarrow$ Rădăcină**.\r\n* Rădăcina este lăsată la sfârșit. Se parcurg integral ambii subarbori înaintea vizitării nodului părinte.\r\n\r\n![Postordine](/media/lectia13/Postorder-traversal.gif)\r\n\r\n---\r\n\r\n## 💻 Implementare C++: Cele 3 Parcurgeri\r\n\r\nDatorită naturii recursive a arborilor, funcțiile de parcurgere sunt extrem de scurte. Ordinea în care plasăm apelurile recursive și comanda de afișare (`cout`) dictează tipul de parcurgere.\r\n\r\n```cpp\r\n#include <iostream>\r\n\r\nusing namespace std;\r\n\r\n// Structura nodului\r\nstruct Nod {\r\n    int valoare;\r\n    Nod* stanga;\r\n    Nod* dreapta;\r\n\r\n    Nod(int val) {\r\n        valoare = val;\r\n        stanga = nullptr;\r\n        dreapta = nullptr;\r\n    }\r\n};\r\n\r\n// 1. Preordine (Rădăcină - Stânga - Dreapta)\r\nvoid preordine(Nod* radacina) {\r\n    if (radacina == nullptr) return;\r\n    \r\n    cout << radacina->valoare << \" \"; // R\r\n    preordine(radacina->stanga);      // S\r\n    preordine(radacina->dreapta);     // D\r\n}\r\n\r\n// 2. Inordine (Stânga - Rădăcină - Dreapta)\r\nvoid inordine(Nod* radacina) {\r\n    if (radacina == nullptr) return;\r\n    \r\n    inordine(radacina->stanga);       // S\r\n    cout << radacina->valoare << \" \"; // R\r\n    inordine(radacina->dreapta);      // D\r\n}\r\n\r\n// 3. Postordine (Stânga - Dreapta - Rădăcină)\r\nvoid postordine(Nod* radacina) {\r\n    if (radacina == nullptr) return;\r\n    \r\n    postordine(radacina->stanga);     // S\r\n    postordine(radacina->dreapta);    // D\r\n    cout << radacina->valoare << \" \"; // R\r\n}\r\n\r\nint main() {\r\n    /* Construim următorul arbore de test:\r\n               1\r\n             /   \\\r\n            2     3\r\n           / \\   / \\\r\n          4   5 6   7\r\n    */\r\n\r\n    Nod* radacina = new Nod(1);\r\n    radacina->stanga = new Nod(2);\r\n    radacina->dreapta = new Nod(3);\r\n    radacina->stanga->stanga = new Nod(4);\r\n    radacina->stanga->dreapta = new Nod(5);\r\n    radacina->dreapta->stanga = new Nod(6);\r\n    radacina->dreapta->dreapta = new Nod(7);\r\n\r\n    cout << \"Parcurgere Preordine (RSD): \";\r\n    preordine(radacina);\r\n    cout << \"\\n\";\r\n\r\n    cout << \"Parcurgere Inordine (SRD):  \";\r\n    inordine(radacina);\r\n    cout << \"\\n\";\r\n\r\n    cout << \"Parcurgere Postordine (SDR): \";\r\n    postordine(radacina);\r\n    cout << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "TREE",
+    "order": 15
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 19,
+  "fields": {
+    "title": "Test de Evaluare: Arbori și Structuri Ierarhice",
+    "content": "Felicitări pentru finalizarea studiului structurilor ierarhice! Ai asimilat cu succes noțiunile despre proprietățile arborilor binari și tehnicile lor de parcurgere recursivă.\r\n\r\nVerifică-ți cunoștințele rezolvând cele 5 întrebări de test de mai jos pentru a încheia acest modul! 🚀",
+    "category": "TREE",
+    "order": 16
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 20,
+  "fields": {
+    "title": "Arbori Binari de Căutare (BST)",
+    "content": "Un **Arbore Binar de Căutare** (BST - Binary Search Tree) este un arbore binar cu o proprietate matematică strictă care îl face extrem de eficient pentru stocarea și regăsirea rapidă a datelor.\r\n\r\n\r\n\r\n## Regula de bază a unui BST\r\nPentru **orice** nod $N$ din arbore:\r\n1. Toate nodurile din subarborele său **stâng** au valori **mai mici** decât valoarea nodului $N$.\r\n2. Toate nodurile din subarborele său **drept** au valori **mai mari** (sau egale) decât valoarea nodului $N$.\r\n\r\nAceastă regulă simplă, aplicată recursiv, menține datele sortate permanent. De fapt, dacă parcurgem un BST în **Inordine (SRD)**, vom obține automat valorile sortate crescător!\r\n\r\n## Căutarea într-un BST\r\n\r\n![Binary tree search](/media/lectia14/Binary_search_tree_example.gif)\r\nCăutarea funcționează exact ca și căutarea binară într-un vector sortat:\r\n* Comparăm valoarea căutată cu rădăcina.\r\n* Dacă este mai mică, ignorăm complet jumătatea dreaptă a arborelui și coborâm pe ramura stângă.\r\n* Dacă este mai mare, coborâm pe ramura dreaptă.\r\n\r\n## Complexitate\r\nDatorită înjumătățirii continue a spațiului de căutare, complexitatea de timp pentru căutare, inserare și ștergere este **$O(\\log N)$** în cazul mediu (unde $N$ este numărul de noduri).\r\n\r\n---\r\n\r\n## 💻 Implementare C++: Inserare, Căutare și Sortare\r\n\r\nCodul de mai jos implementează structura unui BST, funcția recursivă de inserare (care respectă regula de bază a poziționării nodurilor), funcția de căutare eficientă și parcurgerea în inordine care demonstrează sortarea automată a elementelor.\r\n\r\n```cpp\r\n#include <iostream>\r\n\r\nusing namespace std;\r\n\r\nstruct Nod {\r\n    int valoare;\r\n    Nod* stanga;\r\n    Nod* dreapta;\r\n\r\n    Nod(int val) {\r\n        valoare = val;\r\n        stanga = nullptr;\r\n        dreapta = nullptr;\r\n    }\r\n};\r\n\r\n// Funcție pentru inserarea unei valori în BST respectând regula structurii\r\nvoid insereaza(Nod*& radacina, int val) {\r\n    // Dacă am ajuns la un pointer gol, aici este locul noului nod\r\n    if (radacina == nullptr) {\r\n        radacina = new Nod(val);\r\n        return;\r\n    }\r\n\r\n    // Dacă valoarea este mai mică, mergem în stânga\r\n    if (val < radacina->valoare) {\r\n        insereaza(radacina->stanga, val);\r\n    } \r\n    // Dacă valoarea este mai mare sau egală, mergem în dreapta\r\n    else {\r\n        insereaza(radacina->dreapta, val);\r\n    }\r\n}\r\n\r\n// Funcție eficientă de căutare care rulează în O(log N)\r\nbool cauta(Nod* radacina, int val) {\r\n    // Dacă am ajuns la capăt și nu am găsit valoarea\r\n    if (radacina == nullptr) return false;\r\n    \r\n    // Dacă am găsit valoarea în nodul curent\r\n    if (radacina->valoare == val) return true;\r\n\r\n    // Decidem ramura pe care coborâm, ignorând cealaltă jumătate\r\n    if (val < radacina->valoare) {\r\n        return cauta(radacina->stanga, val);\r\n    } else {\r\n        return cauta(radacina->dreapta, val);\r\n    }\r\n}\r\n\r\n// Parcurgerea în Inordine (SRD) va afișa elementele sortate crescător\r\nvoid inordine(Nod* radacina) {\r\n    if (radacina == nullptr) return;\r\n    \r\n    inordine(radacina->stanga);       // Vizităm elementele mai mici\r\n    cout << radacina->valoare << \" \"; // Vizităm rădăcina\r\n    inordine(radacina->dreapta) ;     // Vizităm elementele mai mari\r\n}\r\n\r\nint main() {\r\n    Nod* radacina = nullptr;\r\n\r\n    // Inserăm elemente într-o ordine oarecare\r\n    insereaza(radacina, 8);\r\n    insereaza(radacina, 3);\r\n    insereaza(radacina, 10);\r\n    insereaza(radacina, 1);\r\n    insereaza(radacina, 6);\r\n    insereaza(radacina, 14);\r\n\r\n    // Verificăm dacă regula BST funcționează prin afișarea în inordine\r\n    cout << \"Elementele din BST parcurse in Inordine: \";\r\n    inordine(radacina);\r\n    cout << \"\\n\";\r\n\r\n    // Testăm funcția de căutare\r\n    int val_cautata = 6;\r\n    if (cauta(radacina, val_cautata)) {\r\n        cout << \"Valoarea \" << val_cautata << \" EXISTA in arbore.\\n\";\r\n    } else {\r\n        cout << \"Valoarea \" << val_cautata << \" NU exista in arbore.\\n\";\r\n    }\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "TREE",
+    "order": 17
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 21,
+  "fields": {
+    "title": "Ștergerea dintr-un BST",
+    "content": "Căutarea și inserarea într-un Arbore Binar de Căutare sunt intuitive, dar **ștergerea** unui nod este operația cea mai complexă, deoarece trebuie să menținem validă regula BST-ului.\r\n\r\nExistă 3 scenarii posibile când vrem să ștergem un nod $X$:\r\n\r\n## Cazul 1: Nodul $X$ este o frunză (nu are fii)\r\nEste cel mai simplu caz. Pur și simplu rupem legătura de la părintele său și ștergem nodul $X$ din memorie.\r\n\r\n![Binary_search_tree_delete_13](/media/lectia15/Binary_search_tree_delete_13.svg.png)\r\n\r\n## Cazul 2: Nodul $X$ are un singur fiu (stâng sau drept)\r\nPentru a nu \"rupe\" ierarhia, nodul părinte al lui $X$ va fi conectat direct la unicul fiu al lui $X$, sărind practic peste nodul șters (la fel cum un bunic își adoptă nepotul dacă părintele dispare).\r\n\r\n![Binary_search_tree_delete_14](/media/lectia15/Binary_search_tree_delete_14.svg.png)\r\n\r\n## Cazul 3: Nodul $X$ are doi fii\r\nAici intervine provocarea. Nu putem lega ambii fii de bunic. Algoritmul este următorul:\r\n1. Găsim **succesorul în inordine** al lui $X$ (cel mai mic nod din subarborele său drept) sau **predecesorul în inordine** (cel mai mare nod din subarborele stâng).\r\n2. Copiem valoarea succesorului în nodul $X$.\r\n3. Ștergem fizic nodul succesor din arbore (care va fi mereu Cazul 1 sau Cazul 2, deci mult mai ușor de șters).\r\n\r\n![Binary_search_tree_delete_3](/media/lectia15/Binary_search_tree_delete_3.svg.png)\r\n\r\n---\r\n\r\n## 💻 Implementare C++: Ștergerea dintr-un BST\r\n\r\nCodul de mai jos completează funcționalitatea unui BST cu funcția recursivă `sterge_nod`. Pentru Cazul 3, am implementat varianta în care căutăm succesorul în inordine (valoarea minimă din subarborele drept).\r\n\r\n```cpp\r\n#include <iostream>\r\n\r\nusing namespace std;\r\n\r\nstruct Nod {\r\n    int valoare;\r\n    Nod* stanga;\r\n    Nod* dreapta;\r\n\r\n    Nod(int val) {\r\n        valoare = val;\r\n        stanga = nullptr;\r\n        dreapta = nullptr;\r\n    }\r\n};\r\n\r\n// Funcție ajutătoare pentru a găsi nodul cu valoarea minimă dintr-un subarbore\r\n// (Folosită pentru a găsi succesorul în inordine în subarborele drept)\r\nNod* gaseste_minim(Nod* nod) {\r\n    Nod* curent = nod;\r\n    while (curent && curent->stanga != nullptr) {\r\n        curent = curent->stanga;\r\n    }\r\n    return curent;\r\n}\r\n\r\n// Funcția recursivă pentru ștergerea unui nod din BST\r\nNod* sterge_nod(Nod* radacina, int val) {\r\n    if (radacina == nullptr) return radacina;\r\n\r\n    // 1. Căutăm nodul care trebuie șters\r\n    if (val < radacina->valoare) {\r\n        radacina->stanga = sterge_nod(radacina->stanga, val);\r\n    } else if (val > radacina->valoare) {\r\n        radacina->dreapta = sterge_nod(radacina->dreapta, val);\r\n    } \r\n    // 2. Am găsit nodul (val == radacina->valoare)\r\n    else {\r\n        // Cazul 1 și Cazul 2: Nodul are un singur fiu sau niciunul (frunză)\r\n        if (radacina->stanga == nullptr) {\r\n            Nod* temp = radacina->dreapta;\r\n            delete radacina;\r\n            return temp;\r\n        } else if (radacina->dreapta == nullptr) {\r\n            Nod* temp = radacina->stanga;\r\n            delete radacina;\r\n            return temp;\r\n        }\r\n\r\n        // Cazul 3: Nodul are doi fii\r\n        // Găsim succesorul în inordine (cel mai mic nod din subarborele drept)\r\n        Nod* temp = gaseste_minim(radacina->dreapta);\r\n\r\n        // Copiem valoarea succesorului în nodul curent\r\n        radacina->valoare = temp->valoare;\r\n\r\n        // Ștergem succesorul din subarborele drept\r\n        radacina->dreapta = sterge_nod(radacina->dreapta, temp->valoare);\r\n    }\r\n    return radacina;\r\n}\r\n\r\nvoid insereaza(Nod*& radacina, int val) {\r\n    if (radacina == nullptr) {\r\n        radacina = new Nod(val);\r\n        return;\r\n    }\r\n    if (val < radacina->valoare) insereaza(radacina->stanga, val);\r\n    else insereaza(radacina->dreapta, val);\r\n}\r\n\r\nvoid inordine(Nod* radacina) {\r\n    if (radacina == nullptr) return;\r\n    inordine(radacina->stanga);\r\n    cout << radacina->valoare << \" \";\r\n    inordine(radacina->dreapta);\r\n}\r\n\r\nint main() {\r\n    Nod* radacina = nullptr;\r\n\r\n    // Construim arborele\r\n    insereaza(radacina, 50);\r\n    insereaza(radacina, 30);\r\n    insereaza(radacina, 70);\r\n    insereaza(radacina, 20);\r\n    insereaza(radacina, 40);\r\n    insereaza(radacina, 60);\r\n    insereaza(radacina, 80);\r\n\r\n    cout << \"BST initial (Inordine): \";\r\n    inordine(radacina);\r\n    cout << \"\\n\";\r\n\r\n    cout << \"\\n--- Se sterge nodul 20 (Cazul 1: Frunza) ---\\n\";\r\n    radacina = sterge_nod(radacina, 20);\r\n    cout << \"BST dupa stergere: \";\r\n    inordine(radacina);\r\n    cout << \"\\n\";\r\n\r\n    cout << \"\\n--- Se sterge nodul 30 (Cazul 2: Un singur fiu) ---\\n\";\r\n    radacina = sterge_nod(radacina, 30);\r\n    cout << \"BST dupa stergere: \";\r\n    inordine(radacina);\r\n    cout << \"\\n\";\r\n\r\n    cout << \"\\n--- Se sterge nodul 50 (Cazul 3: Doi fii - Radacina) ---\\n\";\r\n    radacina = sterge_nod(radacina, 50);\r\n    cout << \"BST dupa stergere: \";\r\n    inordine(radacina);\r\n    cout << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "TREE",
+    "order": 18
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 22,
+  "fields": {
+    "title": "Structura de Date Heap",
+    "content": "Un **Heap** este o structură de date specială bazată pe arbori, folosită în principal pentru a implementa eficient **Cozi de Prioritate** (Priority Queues) și algoritmul de sortare **HeapSort**.\r\n\r\n\r\n![HeapSort](/media/lectia16/Heap_sort_example.gif)\r\nUn Heap este întotdeauna un **arbore binar complet** (toate nivelurile sunt pline, iar ultimul nivel este completat de la stânga la dreapta).\r\n\r\n## Tipurile de Heap-uri\r\n1. **Max-Heap:** Valoarea oricărui nod părinte este **mai mare sau egală** cu valorile fiilor săi. Astfel, rădăcina conține mereu valoarea maximă din tot arborele.\r\n2. **Min-Heap:** Valoarea oricărui nod părinte este **mai mică sau egală** cu valorile fiilor săi. Rădăcina conține mereu minimul.\r\n\r\n## Reprezentarea în Memorie (Magia Heap-ului)\r\nDeoarece Heap-ul este un arbore binar complet, el nu folosește pointeri și liste, ci **este stocat direct într-un vector (array)**!\r\nDacă un nod este la indexul $i$:\r\n* Fiul său stâng se află la indexul $2i$.\r\n* Fiul său drept se află la indexul $2i + 1$.\r\n* Părintele său se află la indexul $\\lfloor i / 2 \\rfloor$.\r\n\r\nAceastă reprezentare matematică face ca navigarea să fie extrem de rapidă în memorie ($O(1)$) pentru saltul între părinte și copii.\r\n\r\n---\r\n\r\n## 💻 Implementare C++ (Max-Heap)\r\n\r\nCodul de mai jos implementează structura unui Max-Heap folosind un vector din C++. Lăsăm intenționat indexul `0` gol pentru a respecta întocmai formulele matematice de indexare de la `1` la `N` menționate în teorie.\r\n\r\n```cpp\r\n#include <iostream>\r\n#include <vector>\r\n#include <algorithm>\r\n\r\nusing namespace std;\r\n\r\nclass MaxHeap {\r\nprivate:\r\n    vector<int> heap;\r\n\r\n    // Rearanjează elementul în sus pentru a reface proprietatea de Max-Heap (Sift Up)\r\n    void siftUp(int i) {\r\n        // Cât timp nu am ajuns la rădăcină și valoarea curentă e mai mare decât a părintelui\r\n        while (i > 1 && heap[i] > heap[i / 2]) {\r\n            swap(heap[i], heap[i / 2]);\r\n            i = i / 2; // Urcăm la poziția părintelui\r\n        }\r\n    }\r\n\r\n    // Rearanjează elementul în jos pentru a reface proprietatea de Max-Heap (Sift Down)\r\n    void siftDown(int i) {\r\n        int maxIndex = i;\r\n        int stanga = 2 * i;\r\n        int dreapta = 2 * i + 1;\r\n        int n = heap.size() - 1; // Numărul efectiv de elemente\r\n\r\n        // Verificăm dacă fiul stâng există și este mai mare decât nodul curent\r\n        if (stanga <= n && heap[stanga] > heap[maxIndex]) {\r\n            maxIndex = stanga;\r\n        }\r\n\r\n        // Verificăm dacă fiul drept există și este mai mare decât maximul actual\r\n        if (dreapta <= n && heap[dreapta] > heap[maxIndex]) {\r\n            maxIndex = dreapta;\r\n        }\r\n\r\n        // Dacă nodul maxim este unul dintre fii, facem schimbul și coborâm recursiv\r\n        if (i != maxIndex) {\r\n            swap(heap[i], heap[maxIndex]);\r\n            siftDown(maxIndex);\r\n        }\r\n    }\r\n\r\npublic:\r\n    MaxHeap() {\r\n        // Introducem un element fictiv pe poziția 0 pentru a începe indexarea de la 1\r\n        heap.push_back(0);\r\n    }\r\n\r\n    // Inserarea unui element nou - O(log N)\r\n    void insereaza(int val) {\r\n        heap.push_back(val); // Îl adăugăm la final ca arborele să rămână complet\r\n        siftUp(heap.size() - 1); // Îl urcăm pe poziția corectă\r\n    }\r\n\r\n    // Extragerea și eliminarea valorii maxime (rădăcina) - O(log N)\r\n    int extrage_maxim() {\r\n        if (heap.size() <= 1) {\r\n            cout << \"Heap-ul este gol!\\n\";\r\n            return -1;\r\n        }\r\n\r\n        int maxim = heap[1];\r\n        \r\n        // Înlocuim rădăcina cu ultimul element din vector\r\n        heap[1] = heap.back();\r\n        heap.pop_back();\r\n\r\n        // Împingem noul element în jos pentru a reface proprietatea de heap\r\n        if (heap.size() > 1) {\r\n            siftDown(1);\r\n        }\r\n\r\n        return maxim;\r\n    }\r\n\r\n    // Returnează valoarea maximă fără a o elimina - O(1)\r\n    int obtine_maxim() {\r\n        if (heap.size() <= 1) return -1;\r\n        return heap[1];\r\n    }\r\n\r\n    bool este_gol() {\r\n        return heap.size() <= 1;\r\n    }\r\n};\r\n\r\nint main() {\r\n    MaxHeap h;\r\n\r\n    // Inserăm elemente într-un Max-Heap\r\n    h.insereaza(10);\r\n    h.insereaza(40);\r\n    h.insereaza(15);\r\n    h.insereaza(30);\r\n    h.insereaza(50);\r\n\r\n    cout << \"Valoarea maxima din heap (radacina): \" << h.obtine_maxim() << \"\\n\";\r\n\r\n    cout << \"Extragem elementele in ordine descrescatoare: \";\r\n    while (!h.este_gol()) {\r\n        cout << h.extrage_maxim() << \" \";\r\n    }\r\n    cout << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "TREE",
+    "order": 19
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 23,
+  "fields": {
+    "title": "Arbori AVL (Arbori Echilibrați)",
+    "content": "Arborii Binari de Căutare (BST) au o vulnerabilitate majoră. Dacă inserăm date deja sortate (ex: $1, 2, 3, 4, 5$), arborele se va dezvolta doar pe partea dreaptă, degenerând într-o simplă listă înlănțuită. Căutarea va deveni lentă, cu o complexitate de **$O(N)$**.\r\n\r\nPentru a garanta o viteză de $O(\\log N)$ în orice situație, informaticienii sovietici Adelson-Velsky și Landis au inventat în 1962 **Arborele AVL**.\r\n\r\n![AVL Tree](/media/lectia17/AVL_Tree_Example.gif)\r\n\r\n## Factorul de Echilibru\r\nUn Arbore AVL este un BST care se auto-echilibrează. Pentru fiecare nod, se calculează un **Factor de Echilibru (FE)**:\r\n$$FE = \\text{Înălțime(Subarbore Drept)} - \\text{Înălțime(Subarbore Stâng)}$$\r\n\r\nPentru ca un arbore să fie considerat AVL valid, factorul de echilibru al oricărui nod trebuie să fie strict **$-1$, $0$, sau $1$**.\r\n\r\n## Rotațiile\r\nCând inserăm un nod și factorul de echilibru ajunge la $2$ sau $-2$, arborele este \"dezechilibrat\". Pentru a se repara singur, arborele AVL aplică operații structurale numite **Rotații** (Rotație la Stânga, Rotație la Dreapta, sau rotații duble Stânga-Dreapta / Dreapta-Stânga).\r\nAceste rotații rearanjează nodurile pentru a micșora înălțimea totală a arborelui, fără a strica ordinea matematică a elementelor.\r\n\r\n---\r\n\r\n## 💻 Implementare C++: Inserarea și Auto-Echilibrarea\r\n\r\nAcest cod demonstrează cum un arbore AVL se repară singur atunci când îi dăm elemente gata sortate (ceea ce ar fi distrus un BST normal).\r\n\r\n```cpp\r\n#include <iostream>\r\n\r\nusing namespace std;\r\n\r\n// Structura extinsă pentru AVL\r\nstruct Nod {\r\n    int valoare;\r\n    Nod* stanga;\r\n    Nod* dreapta;\r\n    int inaltime; // Salvăm înălțimea pentru a calcula rapid Factorul de Echilibru\r\n\r\n    Nod(int val) {\r\n        valoare = val;\r\n        stanga = nullptr;\r\n        dreapta = nullptr;\r\n        inaltime = 1; // Un nod nou creat este o frunză, deci are înălțimea 1\r\n    }\r\n};\r\n\r\n// Funcție utilitară pentru a obține înălțimea în siguranță\r\nint inaltime(Nod* N) {\r\n    if (N == nullptr) return 0;\r\n    return N->inaltime;\r\n}\r\n\r\n// Calculăm Factorul de Echilibru (Dreapta - Stânga)\r\nint factor_echilibru(Nod* N) {\r\n    if (N == nullptr) return 0;\r\n    return inaltime(N->dreapta) - inaltime(N->stanga);\r\n}\r\n\r\n// Funcție utilitară pentru maximul dintre două numere\r\nint max(int a, int b) {\r\n    return (a > b) ? a : b;\r\n}\r\n\r\n// ROTAȚIA LA DREAPTA (Cazul Stânga-Stânga)\r\nNod* rotatie_dreapta(Nod* y) {\r\n    Nod* x = y->stanga;\r\n    Nod* T2 = x->dreapta;\r\n\r\n    // Efectuăm rotația\r\n    x->dreapta = y;\r\n    y->stanga = T2;\r\n\r\n    // Actualizăm înălțimile (întâi y, apoi x)\r\n    y->inaltime = max(inaltime(y->stanga), inaltime(y->dreapta)) + 1;\r\n    x->inaltime = max(inaltime(x->stanga), inaltime(x->dreapta)) + 1;\r\n\r\n    return x; // Noua rădăcină a subarborelui\r\n}\r\n\r\n// ROTAȚIA LA STÂNGA (Cazul Dreapta-Dreapta)\r\nNod* rotatie_stanga(Nod* x) {\r\n    Nod* y = x->dreapta;\r\n    Nod* T2 = y->stanga;\r\n\r\n    // Efectuăm rotația\r\n    y->stanga = x;\r\n    x->dreapta = T2;\r\n\r\n    // Actualizăm înălțimile\r\n    x->inaltime = max(inaltime(x->stanga), inaltime(x->dreapta)) + 1;\r\n    y->inaltime = max(inaltime(y->stanga), inaltime(y->dreapta)) + 1;\r\n\r\n    return y; // Noua rădăcină a subarborelui\r\n}\r\n\r\n// Inserarea AVL care menține arborele echilibrat\r\nNod* insereaza(Nod* nod, int val) {\r\n    // 1. Inserarea normală de BST\r\n    if (nod == nullptr) return new Nod(val);\r\n\r\n    if (val < nod->valoare)\r\n        nod->stanga = insereaza(nod->stanga, val);\r\n    else if (val > nod->valoare)\r\n        nod->dreapta = insereaza(nod->dreapta, val);\r\n    else // Valorile duplicate nu sunt permise\r\n        return nod;\r\n\r\n    // 2. Actualizăm înălțimea nodului curent\r\n    nod->inaltime = 1 + max(inaltime(nod->stanga), inaltime(nod->dreapta));\r\n\r\n    // 3. Calculăm Factorul de Echilibru pentru a vedea dacă am stricat echilibrul\r\n    int FE = factor_echilibru(nod);\r\n\r\n    // Cazul 1: Stânga-Stânga (FE < -1 și s-a inserat în stânga fiului stâng)\r\n    if (FE < -1 && val < nod->stanga->valoare)\r\n        return rotatie_dreapta(nod);\r\n\r\n    // Cazul 2: Dreapta-Dreapta (FE > 1 și s-a inserat în dreapta fiului drept)\r\n    if (FE > 1 && val > nod->dreapta->valoare)\r\n        return rotatie_stanga(nod);\r\n\r\n    // Cazul 3: Stânga-Dreapta (FE < -1 și s-a inserat în dreapta fiului stâng)\r\n    if (FE < -1 && val > nod->stanga->valoare) {\r\n        nod->stanga = rotatie_stanga(nod->stanga);\r\n        return rotatie_dreapta(nod);\r\n    }\r\n\r\n    // Cazul 4: Dreapta-Stânga (FE > 1 și s-a inserat în stânga fiului drept)\r\n    if (FE > 1 && val < nod->dreapta->valoare) {\r\n        nod->dreapta = rotatie_dreapta(nod->dreapta);\r\n        return rotatie_stanga(nod);\r\n    }\r\n\r\n    return nod; // Arborele a rămas echilibrat\r\n}\r\n\r\n// Afișare Preordine pentru a verifica structura rădăcinii\r\nvoid preordine(Nod* radacina) {\r\n    if (radacina != nullptr) {\r\n        cout << radacina->valoare << \" \";\r\n        preordine(radacina->stanga);\r\n        preordine(radacina->dreapta);\r\n    }\r\n}\r\n\r\nint main() {\r\n    Nod* radacina = nullptr;\r\n\r\n    // Inserăm date GATA SORTATE (scenariul fatal pentru un BST normal)\r\n    radacina = insereaza(radacina, 10);\r\n    radacina = insereaza(radacina, 20);\r\n    radacina = insereaza(radacina, 30); // Aici se declanșează Rotația la Stânga\r\n    radacina = insereaza(radacina, 40);\r\n    radacina = insereaza(radacina, 50); // Aici se declanșează altă Rotație la Stânga\r\n\r\n    cout << \"Arborele AVL construit din numere sortate (10 20 30 40 50)\\n\";\r\n    cout << \"Parcurgere Preordine (Radacina este afisata prima): \";\r\n    \r\n    // Daca era un BST normal, radacina ar fi ramas 10, iar 30 ar fi fost mult in dreapta.\r\n    // Intr-un AVL perfect echilibrat, radacina va fi centrul (30).\r\n    preordine(radacina); \r\n    cout << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n```",
+    "category": "TREE",
+    "order": 20
+  }
+},
+{
+  "model": "core.lesson",
+  "pk": 24,
+  "fields": {
+    "title": "Test de Evaluare: Arbori de Căutare și Echilibrare",
+    "content": "Ai ajuns la finalul complet al cursului ArbGraph! Felicitări pentru persistență și pentru volumul impresionant de algoritmică asimilat. \r\n\r\nAcest ultim set de întrebări îți va testa înțelegerea structurilor avansate de date (BST, Heap, AVL). Răspunde corect la toate cele 5 întrebări pentru a atinge stadiul de progresie 100% și a deveni un Maestru al Grafurilor și Arborilor! 🎓",
+    "category": "TREE",
+    "order": 21
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 10,
+  "fields": {
+    "lesson": 4,
+    "question": "Într-un graf neorientat cu 5 noduri, care este numărul maxim de muchii pe care îl poate avea (situația în care formează un graf complet)?",
+    "option_a": "5",
+    "option_b": "10",
+    "option_c": "20",
+    "option_d": "25",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 11,
+  "fields": {
+    "lesson": 5,
+    "question": "Care este complexitatea spațială (memoria ocupată) pentru reprezentarea unui graf folosind o matrice de adiacență, dacă $V$ este numărul de noduri și $E$ numărul de muchii?",
+    "option_a": "$O(V)$",
+    "option_b": "$O(V + E)$",
+    "option_c": "$O(V^2)$",
+    "option_d": "$O(E^2)$",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 12,
+  "fields": {
+    "lesson": 6,
+    "question": "Într-un graf orientat (digraf) cu $m$ arce, care este suma gradelor exterioare pentru toate nodurile din graf?",
+    "option_a": "$m$",
+    "option_b": "$2m$",
+    "option_c": "$m / 2$",
+    "option_d": "$m^2$",
+    "correct_answer": "option_a"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 13,
+  "fields": {
+    "lesson": 7,
+    "question": "Ce structură de date auxiliară este utilizată în mod standard pentru a implementa algoritmul de parcurgere în lățime (BFS)?",
+    "option_a": "Stivă (Stack)",
+    "option_b": "Coadă (Queue)",
+    "option_c": "Arbore Binar (Binary Tree)",
+    "option_d": "Tabelă de Dispersie (Hash Table)",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 14,
+  "fields": {
+    "lesson": 8,
+    "question": "Care este principiul de funcționare al structurii de date (Stiva) utilizate pentru implementarea iterativă a parcurgerii în adâncime (DFS)?",
+    "option_a": "FIFO (First In, First Out)",
+    "option_b": "LILO (Last In, Last Out)",
+    "option_c": "LIFO (Last In, First Out)",
+    "option_d": "Random Access",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 15,
+  "fields": {
+    "lesson": 9,
+    "question": "1. Într-un graf complet cu 4 noduri, câte muchii există în total? (Amintește-ți formula $m = n(n-1)/2$)",
+    "option_a": "4",
+    "option_b": "6",
+    "option_c": "8",
+    "option_d": "12",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 16,
+  "fields": {
+    "lesson": 9,
+    "question": "2. Ce caracteristică are matricea de adiacență a unui graf neorientat?",
+    "option_a": "Este mereu plină de 1",
+    "option_b": "Are mereu 1 pe diagonala principală",
+    "option_c": "Este asimetrică",
+    "option_d": "Este simetrică față de diagonala principală",
+    "correct_answer": "option_d"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 17,
+  "fields": {
+    "lesson": 9,
+    "question": "3. Ce algoritm de parcurgere folosește o structură de tip FIFO (Coadă) pentru a explora nodurile nivel cu nivel?",
+    "option_a": "BFS (Breadth-First Search)",
+    "option_b": "DFS (Depth-First Search)",
+    "option_c": "Algoritmul lui Dijkstra",
+    "option_d": "Căutarea Binară",
+    "correct_answer": "option_a"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 18,
+  "fields": {
+    "lesson": 9,
+    "question": "4. Care metodă de reprezentare a unui graf are o complexitate spațială de $O(V+E)$ și este ideală pentru grafuri rare (cu puține muchii)?",
+    "option_a": "Matricea de Adiacență",
+    "option_b": "Matricea de Incidență",
+    "option_c": "Listele de Adiacență",
+    "option_d": "Vectorul de tați",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 19,
+  "fields": {
+    "lesson": 9,
+    "question": "5. Dacă într-un graf orientat avem o muchie de la nodul $X$ la nodul $Y$, cum numim nodul $Y$?",
+    "option_a": "Extremitate inițială (predecesor)",
+    "option_b": "Nod izolat",
+    "option_c": "Extremitate finală (succesor)",
+    "option_d": "Rădăcină",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 20,
+  "fields": {
+    "lesson": 10,
+    "question": "Care este restricția principală a algoritmului lui Dijkstra? (În ce situație nu va funcționa corect?)",
+    "option_a": "Nu funcționează pe grafuri neorientate.",
+    "option_b": "Nu poate fi aplicat dacă graful are muchii cu ponderi (costuri) negative.",
+    "option_c": "Funcționează doar pe matrice de adiacență.",
+    "option_d": "Nu găsește drumul minim, ci drumul maxim.",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 21,
+  "fields": {
+    "lesson": 11,
+    "question": "Care este complexitatea de timp (în funcție de numărul de noduri $V$) a algoritmului Floyd-Warshall / Roy-Warshall, generată de cele trei structuri repetitive imbricate?",
+    "option_a": "$O(V)$",
+    "option_b": "$O(V^2)$",
+    "option_c": "$O(V^3)$",
+    "option_d": "$O(V \\log V)$",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 22,
+  "fields": {
+    "lesson": 12,
+    "question": "Câte muchii va avea obligatoriu un Arbore de Acoperire Minimă (MST) construit pentru un graf conex cu $V$ noduri?",
+    "option_a": "$V$ muchii",
+    "option_b": "$V - 1$ muchii",
+    "option_c": "$V + 1$ muchii",
+    "option_d": "Numărul maxim posibil de muchii",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 23,
+  "fields": {
+    "lesson": 13,
+    "question": "Ce structură de date avansată este utilizată în mod ideal împreună cu Algoritmul lui Kruskal pentru a detecta și evita formarea ciclurilor?",
+    "option_a": "Stiva (LIFO)",
+    "option_b": "Matricea de adiacență",
+    "option_c": "Mulțimi Disjuncte (Union-Find)",
+    "option_d": "Coada circulară",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 24,
+  "fields": {
+    "lesson": 14,
+    "question": "Pe ce tip de grafuri se poate aplica algoritmul de Sortare Topologică?",
+    "option_a": "Grafuri neorientate complete",
+    "option_b": "Grafuri orientate cu cel puțin un ciclu (cyclic graphs)",
+    "option_c": "Grafuri bipartite",
+    "option_d": "Grafuri Orientate Aciclice (DAG)",
+    "correct_answer": "option_d"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 25,
+  "fields": {
+    "lesson": 15,
+    "question": "1. Ce algoritm utilizează tehnica relaxării muchiilor pentru a găsi drumul minim de la un singur nod sursă către toate celelalte noduri, atâta timp cât costurile sunt pozitive?",
+    "option_a": "Roy-Warshall",
+    "option_b": "Kruskal",
+    "option_c": "Dijkstra",
+    "option_d": "DFS",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 26,
+  "fields": {
+    "lesson": 15,
+    "question": "2. Algoritmul Roy-Warshall / Floyd-Warshall găsește drumul minim între oricare două perechi de noduri. Pe ce paradigmă de programare se bazează?",
+    "option_a": "Divide et Impera",
+    "option_b": "Programare Dinamică",
+    "option_c": "Algoritmi Greedy",
+    "option_d": "Backtracking",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 27,
+  "fields": {
+    "lesson": 15,
+    "question": "3. Ce au în comun algoritmul lui Prim și algoritmul lui Kruskal?",
+    "option_a": "Ambele construiesc Arbori de Acoperire Minimă (MST).",
+    "option_b": "Ambele funcționează doar pe matrice de adiacență asimetrică.",
+    "option_c": "Ambele sunt folosite pentru Sortare Topologică.",
+    "option_d": "Ambele sunt algoritmi de tip Divide et Impera.",
+    "correct_answer": "option_a"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 28,
+  "fields": {
+    "lesson": 15,
+    "question": "4. În algoritmul lui Kruskal, primul pas logic înainte de a procesa efectiv graful este:",
+    "option_a": "Sortarea tuturor muchiilor crescător în funcție de ponderea/costul lor.",
+    "option_b": "Identificarea unui nod sursă aleator.",
+    "option_c": "Inițializarea unui vector de distanțe cu infinit.",
+    "option_d": "Apelarea algoritmului BFS.",
+    "correct_answer": "option_a"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 29,
+  "fields": {
+    "lesson": 15,
+    "question": "5. Dacă vrei să modelezi ordinea de compilare a mai multor fișiere de cod (unde un fișier depinde de altul), ce concept grafic și algoritmic vei folosi?",
+    "option_a": "Graf bipartit și Colorare",
+    "option_b": "Graf complet și Kruskal",
+    "option_c": "Graf Orientat Aciclic (DAG) și Sortare Topologică",
+    "option_d": "Graf neponderat și Dijkstra",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 30,
+  "fields": {
+    "lesson": 16,
+    "question": "Cum se numește un nod dintr-un arbore care are gradul de descendență egal cu 0 (nu are niciun fiu)?",
+    "option_a": "Rădăcină",
+    "option_b": "Nod intern",
+    "option_c": "Frunză",
+    "option_d": "Nod părinte",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 31,
+  "fields": {
+    "lesson": 17,
+    "question": "Într-un arbore binar oarecare, care este numărul maxim de fii (descendenți direcți) pe care îi poate avea un singur nod?",
+    "option_a": "2",
+    "option_b": "1",
+    "option_c": "Oricâți",
+    "option_d": "4",
+    "correct_answer": "option_a"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 32,
+  "fields": {
+    "lesson": 18,
+    "question": "În ce tip de parcurgere a unui arbore binar se vizitează mai întâi nodul rădăcină, urmat apoi de subarborele stâng și subarborele drept (RSD)?",
+    "option_a": "Inordine",
+    "option_b": "Preordine",
+    "option_c": "Postordine",
+    "option_d": "Parcurgere pe niveluri",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 33,
+  "fields": {
+    "lesson": 19,
+    "question": "1. Din punct de vedere al teoriei grafurilor, cum definim formal un arbore?",
+    "option_a": "Un graf orientat cu cicluri",
+    "option_b": "Un graf conex și aciclic",
+    "option_c": "Un graf ponderat complet asimetric",
+    "option_d": "O matrice de adiacență simetrică",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 34,
+  "fields": {
+    "lesson": 19,
+    "question": "2. Pe ce nivel al ierarhiei se situează întotdeauna nodul rădăcină al unui arbore?",
+    "option_a": "Nivelul 0",
+    "option_b": "Nivelul 1",
+    "option_c": "Nivelul -1",
+    "option_d": "Ultimul nivel ($h$)",
+    "correct_answer": "option_a"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 35,
+  "fields": {
+    "lesson": 19,
+    "question": "Câte noduri are în total un arbore binar plin care are înălțimea $h = 2$? (Folosește formula $2^{h+1} - 1$)",
+    "option_a": "3 noduri",
+    "option_b": "5 noduri",
+    "option_c": "7 noduri",
+    "option_d": "15 noduri",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 36,
+  "fields": {
+    "lesson": 19,
+    "question": "4. Ce metodă de parcurgere accesează nodurile în ordinea succesiunii: Subarbore Stâng, Rădăcină, Subarbore Drept (SRD)?",
+    "option_a": "Preordine (RSD)",
+    "option_b": "Postordine (SDR)",
+    "option_c": "Inordine (SRD)",
+    "option_d": "Parcurgerea BFS",
+    "correct_answer": "option_d"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 37,
+  "fields": {
+    "lesson": 19,
+    "question": "5. Dacă un arbore oarecare (graf conex și aciclic) are în total $V$ noduri, câte muchii va conține acesta?",
+    "option_a": "$V$ muchii",
+    "option_b": "$V - 1$ muchii",
+    "option_c": "$V + 1$ muchii",
+    "option_d": "$2V$ muchii",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 38,
+  "fields": {
+    "lesson": 20,
+    "question": "Ce metodă de parcurgere a unui Arbore Binar de Căutare (BST) va procesa nodurile în ordine strict crescătoare?",
+    "option_a": "Preordine (RSD)",
+    "option_b": "Parcurgere în Lățime (BFS)",
+    "option_c": "Inordine (SRD)",
+    "option_d": "Postordine (SDR)",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 39,
+  "fields": {
+    "lesson": 21,
+    "question": "În cazul ștergerii unui nod cu exact doi descendenți dintr-un BST, cu ce valoare va fi înlocuit acesta pentru a menține proprietatea arborelui?",
+    "option_a": "Rădăcina arborelui.",
+    "option_b": "Succesorul său în inordine (sau predecesorul).",
+    "option_c": "Valoarea zero.",
+    "option_d": "Cu media aritmetică a celor doi fii.",
+    "correct_answer": "option_b"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 40,
+  "fields": {
+    "lesson": 22,
+    "question": "Cum sunt stocate de obicei, în memorie, elementele unei structuri de date Heap pentru o eficiență maximă?",
+    "option_a": "Folosind o listă dublu înlănțuită.",
+    "option_b": "Într-o matrice de adiacență.",
+    "option_c": "Direct într-un vector (array) liniar.",
+    "option_d": "Într-un graf complet.",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 41,
+  "fields": {
+    "lesson": 23,
+    "question": "Care este valorile permise pentru Factorul de Echilibru (FE) al oricărui nod dintr-un arbore perfect stabilizat de tip AVL?",
+    "option_a": "Orice număr par.",
+    "option_b": "Doar 0.",
+    "option_c": "Între -1, 0 și 1.",
+    "option_d": "Oricât, cu condiția să nu depășească $N$.",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 42,
+  "fields": {
+    "lesson": 24,
+    "question": "1. Într-un Arbore Binar de Căutare (BST), dacă nodul rădăcină are valoarea $50$, unde va fi stocat în mod sigur un nod cu valoarea $30$?",
+    "option_a": "În subarborele stâng.",
+    "option_b": "Pe nivelul 0.",
+    "option_c": "În subarborele drept.",
+    "option_d": "Ca frunză dreaptă a nodului 50.",
+    "correct_answer": "option_a"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 43,
+  "fields": {
+    "lesson": 24,
+    "question": "2. Care este complexitatea de timp (average case) pentru căutarea unui element într-un BST bine echilibrat care conține $N$ noduri?",
+    "option_a": "$O(1)$",
+    "option_b": "$O(N)$",
+    "option_c": "$O(N^2)$",
+    "option_d": "$O(\\log N)$",
+    "correct_answer": "option_d"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 44,
+  "fields": {
+    "lesson": 24,
+    "question": "3. Cum poate un arbore AVL să rezolve dezechilibrul structural cauzat de inserarea succesivă a unor valori crescătoare?",
+    "option_a": "Ștergând automat valorile cele mai vechi.",
+    "option_b": "Folosind algoritmul lui Dijkstra.",
+    "option_c": "Aplicând operații de Rotație pentru a rearanja nodurile.",
+    "option_d": "Transformându-se într-un graf complet.",
+    "correct_answer": "option_c"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 45,
+  "fields": {
+    "lesson": 24,
+    "question": "4. Într-o structură Max-Heap, unde se găsește întotdeauna cel mai mare element din tot arborele?",
+    "option_a": "În nodul Rădăcină.",
+    "option_b": "În cea mai adâncă frunză de pe partea dreaptă.",
+    "option_c": "La mijlocul vectorului.",
+    "option_d": "Într-un nod terminal (frunză) oarecare.",
+    "correct_answer": "option_a"
+  }
+},
+{
+  "model": "core.exercise",
+  "pk": 46,
+  "fields": {
+    "lesson": 24,
+    "question": "5. Dacă structura unui Heap este reprezentată într-un vector (array) și un nod se află la indexul $i=3$, la ce index se va găsi fiul său stâng? (Folosind formula clasică de calculată plecând de la indexul 1)",
+    "option_a": "4",
+    "option_b": "6",
+    "option_c": "7",
+    "option_d": "nu are fiu stâng.",
+    "correct_answer": "option_b"
+  }
+}
+]
