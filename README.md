@@ -2,7 +2,7 @@
 
 **An interactive web platform for learning tree and graph algorithms.**
 
-ArbGraph helps students understand tree and graph algorithms through step-by-step visualisations, short lessons and practice exercises. It was built as my bachelor's thesis project in Computer Science at Titu Maiorescu University, Bucharest, and was graded 10/10 at the defence.
+ArbGraph helps students understand tree and graph algorithms through step-by-step visualisations, short lessons and practice exercises. It was built as my bachelor's thesis project in Computer Science at Titu Maiorescu University, Bucharest.
 
 <p align="center">
   <img src="docs/Screenshot1.png" width="100%" alt="Lesson page">
