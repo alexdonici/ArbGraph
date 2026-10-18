@@ -4,9 +4,11 @@
 
 ArbGraph helps students understand tree and graph algorithms through step-by-step visualisations, short lessons and practice exercises. It was built as my bachelor's thesis project in Computer Science at Titu Maiorescu University, Bucharest, and was graded 10/10 at the defence.
 
-![ArbGraph screenshot](docs/screenshot-lesson.png)
-<!-- Add 2–3 screenshots in a docs/ folder: lesson page, visualisation, exercise -->
-
+<p align="center">
+  <img src="docs/Screenshot1.png" width="32%" alt="ArbGraph screenshot 1">
+  <img src="docs/Screenshot2.png" width="32%" alt="ArbGraph screenshot 2">
+  <img src="docs/Screenshot3.png" width="32%" alt="ArbGraph screenshot 3">
+</p>
 ---
 
 ## Features
